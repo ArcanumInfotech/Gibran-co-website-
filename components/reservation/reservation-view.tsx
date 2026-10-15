@@ -8,6 +8,7 @@ import {
   PinIcon,
   ClockIcon,
   PhoneIcon,
+  WhatsAppIcon,
   ArrowRightIcon,
   PlayIcon,
   PauseIcon,
@@ -16,7 +17,7 @@ import {
   CheckIcon,
 } from "@/components/icons";
 import { EASE_EDITORIAL, SplitText, Magnetic } from "@/components/motion-primitives";
-import { formatReservationMessage } from "@/lib/reservation-utils";
+import { formatReservationMessage, createWhatsAppUrl } from "@/lib/reservation-utils";
 import { OliveBranchBotanical } from "@/components/olive-branch-botanical";
 import {
   getSelectedDishes,
@@ -147,11 +148,35 @@ export function ReservationView() {
     if (!formData.name.trim()) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setBookingRef(`GC-${Math.floor(10000 + Math.random() * 90000)}`);
-      setIsConfirmed(true);
-    }, 700);
+    const code = `GC-${Math.floor(10000 + Math.random() * 90000)}`;
+    setBookingRef(code);
+
+    const bookingDetails = {
+      bookingCode: code,
+      name: formData.name,
+      phone: formData.phone,
+      guests: formData.guests,
+      time: formData.time,
+      date: formData.date || "Tonight",
+      location: formData.location,
+      seating: formData.seating,
+      notes: formData.notes,
+      selectedDishes: selectedDishes.map((d) => ({
+        name: d.name,
+        quantity: d.quantity,
+        price: d.price,
+      })),
+    };
+
+    const whatsappUrl = createWhatsAppUrl(bookingDetails);
+
+    setIsConfirmed(true);
+    setIsSubmitting(false);
+
+    // Direct top-level navigation to WhatsApp
+    if (typeof window !== "undefined") {
+      window.location.href = whatsappUrl;
+    }
   };
 
   const handleReset = () => {
@@ -505,18 +530,27 @@ export function ReservationView() {
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.8, delay: 0.8, ease: EASE_EDITORIAL }}
-                      className="pt-2"
+                      className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
                     >
-                      <Magnetic strength={0.22}>
+                      <Magnetic strength={0.22} className="flex-1">
                         <button
                           type="submit"
                           disabled={isSubmitting}
-                          className="inline-flex items-center justify-center gap-3 rounded-full bg-[#6d7835] px-9 py-3.5 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-xl transition-all duration-300 hover:bg-[#5b642c] hover:shadow-2xl active:scale-95 disabled:opacity-60"
+                          className="w-full inline-flex items-center justify-center gap-2.5 rounded-full bg-[#25D366] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-xl transition-all duration-300 hover:bg-[#20ba59] hover:shadow-2xl active:scale-95 disabled:opacity-60"
                         >
-                          <span>{isSubmitting ? "Reserving..." : "Book Now"}</span>
-                          <ArrowRightIcon className="h-3.5 w-3.5 transition-transform duration-500 ease-editorial group-hover:translate-x-1" />
+                          <WhatsAppIcon className="h-4 w-4 fill-white" />
+                          <span>{isSubmitting ? "Opening WhatsApp..." : "Reserve on WhatsApp"}</span>
+                          <ArrowRightIcon className="h-3.5 w-3.5" />
                         </button>
                       </Magnetic>
+
+                      <a
+                        href="https://wa.me/917994129471?text=Hello%20Gibran%20%26%20Co.%20Concierge%2C%20I%20would%20like%20to%20reserve%20a%20table."
+                        className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-black/25 px-5 py-3.5 text-xs font-semibold text-[#A6B8A2] hover:text-white hover:border-[#C5A880] transition-colors"
+                      >
+                        <WhatsAppIcon className="h-3.5 w-3.5 fill-[#25D366]" />
+                        <span>Direct Chat</span>
+                      </a>
                     </motion.div>
                   </form>
                 </motion.div>
@@ -636,6 +670,32 @@ export function ReservationView() {
                         </>
                       )}
                     </button>
+
+                    {/* Direct WhatsApp Concierge Button */}
+                    <a
+                      href={createWhatsAppUrl({
+                        bookingCode: bookingRef,
+                        name: formData.name,
+                        phone: formData.phone,
+                        guests: formData.guests,
+                        time: formData.time,
+                        date: formData.date || "Tonight",
+                        location: formData.location,
+                        seating: formData.seating,
+                        notes: formData.notes,
+                        selectedDishes: selectedDishes.map((d) => ({
+                          name: d.name,
+                          quantity: d.quantity,
+                          price: d.price,
+                        })),
+                      })}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] py-3 text-xs font-semibold text-white shadow-md hover:bg-[#20ba59] transition-all active:scale-[0.99]"
+                    >
+                      <WhatsAppIcon className="h-4 w-4 fill-white" />
+                      <span>Chat on WhatsApp</span>
+                    </a>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3 pt-2">

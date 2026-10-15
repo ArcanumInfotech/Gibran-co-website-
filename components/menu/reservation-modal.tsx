@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CopyIcon, CheckIcon } from "@/components/icons";
+import { CopyIcon, CheckIcon, WhatsAppIcon } from "@/components/icons";
 import { useSmoothScroll } from "@/components/smooth-scroll-provider";
-import { formatReservationMessage } from "@/lib/reservation-utils";
+import { formatReservationMessage, createWhatsAppUrl } from "@/lib/reservation-utils";
 import {
   getSelectedDishes,
   removeDishFromSelection,
@@ -87,7 +87,31 @@ export function ReservationModal({
     e.preventDefault();
     const code = `GIB-${Math.floor(100000 + Math.random() * 900000)}`;
     setConfirmationCode(code);
+
+    const bookingDetails = {
+      bookingCode: code,
+      name,
+      phone,
+      location,
+      time,
+      date,
+      guests,
+      seating,
+      selectedDishes: selectedDishes.map((d) => ({
+        name: d.name,
+        quantity: d.quantity,
+        price: d.price,
+      })),
+    };
+
+    const whatsappUrl = createWhatsAppUrl(bookingDetails);
+
     setStep("confirmed");
+
+    // Direct top-level navigation to WhatsApp
+    if (typeof window !== "undefined") {
+      window.location.href = whatsappUrl;
+    }
   };
 
   const handleReset = () => {
@@ -289,12 +313,13 @@ export function ReservationModal({
                 </div>
               </div>
 
-              <div className="pt-3">
+              <div className="pt-3 space-y-2">
                 <button
                   type="submit"
-                  className="w-full rounded-full bg-[#6d7835] py-3.5 text-xs font-semibold uppercase tracking-[0.16em] text-white shadow-md hover:bg-[#5b642c] transition-all"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] py-3.5 text-xs font-semibold uppercase tracking-[0.16em] text-white shadow-md hover:bg-[#20ba59] transition-all"
                 >
-                  Confirm Table Reservation
+                  <WhatsAppIcon className="h-4 w-4 fill-white" />
+                  <span>Reserve Table on WhatsApp</span>
                 </button>
               </div>
             </form>
@@ -386,6 +411,31 @@ export function ReservationModal({
                     </>
                   )}
                 </button>
+
+                {/* Direct WhatsApp Concierge Button */}
+                <a
+                  href={createWhatsAppUrl({
+                    bookingCode: confirmationCode,
+                    name,
+                    phone,
+                    location,
+                    time,
+                    date,
+                    guests,
+                    seating,
+                    selectedDishes: selectedDishes.map((d) => ({
+                      name: d.name,
+                      quantity: d.quantity,
+                      price: d.price,
+                    })),
+                  })}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-[#20ba59] transition-all"
+                >
+                  <WhatsAppIcon className="h-4 w-4 fill-white" />
+                  <span>Chat on WhatsApp</span>
+                </a>
               </div>
 
               <div className="pt-2">

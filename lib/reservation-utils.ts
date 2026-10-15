@@ -71,9 +71,9 @@ export function createWhatsAppUrl(
   const phone = formatWhatsAppPhone(targetPhone);
   if (details) {
     const text = formatReservationMessage(details);
-    return `https://api.whatsapp.com/send/?phone=${phone}&text=${encodeURIComponent(text)}`;
+    return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
   }
-  return `https://api.whatsapp.com/send/?phone=${phone}`;
+  return `https://wa.me/${phone}`;
 }
 
 export function createEmailUrl(

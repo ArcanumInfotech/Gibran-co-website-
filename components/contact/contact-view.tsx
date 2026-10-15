@@ -28,16 +28,39 @@ export function ContactView() {
     message: "",
   });
 
+  const [submittedData, setSubmittedData] = useState<typeof formData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-    }, 800);
+
+    const snapshot = { ...formData };
+    setSubmittedData(snapshot);
+
+    // Format message for WhatsApp
+    const messageLines = [
+      `*New Concierge Inquiry — Gibran & Co.*`,
+      ``,
+      `*Name:* ${snapshot.name}`,
+      `*Phone:* ${snapshot.phone}`,
+      `*Email:* ${snapshot.email}`,
+      `*Inquiry Topic:* ${snapshot.inquiryType}`,
+      ``,
+      `*Message:*`,
+      snapshot.message,
+    ];
+    const encodedText = encodeURIComponent(messageLines.join("\n"));
+    const whatsappUrl = `https://wa.me/917994129471?text=${encodedText}`;
+
+    setIsSubmitted(true);
+    setIsSubmitting(false);
+
+    // Direct top-level navigation to WhatsApp
+    if (typeof window !== "undefined") {
+      window.location.href = whatsappUrl;
+    }
   };
 
   const contactCards = [
@@ -226,34 +249,78 @@ export function ContactView() {
                 </p>
               </div>
 
-              {isSubmitted ? (
-                <div className="rounded-2xl border border-warmGold/40 bg-[#FAF7F0] p-8 text-center space-y-4">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#6d7835] text-white text-xl">
+              {isSubmitted && submittedData ? (
+                <div className="rounded-2xl border border-warmGold/40 bg-[#FAF7F0] p-6 sm:p-8 text-center space-y-5">
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#6d7835] text-white text-2xl shadow-md">
                     ✓
                   </div>
-                  <h3 className="font-serif text-2xl font-semibold text-oliveDark">
-                    Inquiry Received
-                  </h3>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-warmGold">
+                      Concierge Confirmation
+                    </span>
+                    <h3 className="font-serif text-2xl sm:text-3xl font-semibold text-oliveDark mt-1">
+                      Inquiry Received
+                    </h3>
+                  </div>
                   <p className="text-xs sm:text-sm text-oliveMuted leading-relaxed max-w-md mx-auto">
-                    Thank you, <strong>{formData.name}</strong>. Your message has been routed to our
-                    guest relations team. We will respond within two hours.
+                    Thank you, <strong className="text-oliveDark font-semibold">{submittedData.name}</strong>.
+                    Your message has been received and routed directly to our WhatsApp Concierge desk.
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsSubmitted(false);
-                      setFormData({
-                        name: "",
-                        email: "",
-                        phone: "",
-                        inquiryType: "Table Reservation",
-                        message: "",
-                      });
-                    }}
-                    className="mt-4 inline-flex items-center text-xs font-semibold uppercase tracking-wider text-[#6d7835] hover:underline"
-                  >
-                    Send another inquiry
-                  </button>
+
+                  {/* Summary of submitted inquiry */}
+                  <div className="rounded-xl border border-[#ECE7DC] bg-white p-4 text-left text-xs space-y-2 max-w-md mx-auto shadow-xs">
+                    <div className="flex justify-between py-1 border-b border-[#F0ECE1]">
+                      <span className="text-oliveMuted">Topic:</span>
+                      <span className="font-medium text-oliveDark">{submittedData.inquiryType}</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-[#F0ECE1]">
+                      <span className="text-oliveMuted">Phone:</span>
+                      <span className="font-medium text-oliveDark">{submittedData.phone}</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-[#F0ECE1]">
+                      <span className="text-oliveMuted">Email:</span>
+                      <span className="font-medium text-oliveDark">{submittedData.email}</span>
+                    </div>
+                    <div className="pt-1">
+                      <span className="text-oliveMuted block mb-1">Message:</span>
+                      <p className="text-oliveDark italic bg-[#FAF7F0] p-2.5 rounded-lg border border-[#ECE7DC]/60 whitespace-pre-wrap">
+                        {submittedData.message}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Actions: Open in WhatsApp or Send another */}
+                  <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                    <a
+                      href={`https://wa.me/917994129471?text=${encodeURIComponent(
+                        `*New Concierge Inquiry — Gibran & Co.*\n\n*Name:* ${submittedData.name}\n*Phone:* ${submittedData.phone}\n*Email:* ${submittedData.email}\n*Inquiry Topic:* ${submittedData.inquiryType}\n\n*Message:*\n${submittedData.message}`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-3 text-xs font-semibold uppercase tracking-wider text-white shadow-md transition-all hover:bg-[#20ba59] hover:shadow-lg"
+                    >
+                      <WhatsAppIcon className="h-4 w-4 fill-white" />
+                      <span>Chat on WhatsApp</span>
+                    </a>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsSubmitted(false);
+                        setFormData({
+                          name: "",
+                          email: "",
+                          phone: "",
+                          inquiryType: "Table Reservation",
+                          message: "",
+                        });
+                        setSubmittedData(null);
+                      }}
+                      className="inline-flex w-full sm:w-auto items-center justify-center rounded-full border border-[#DCD5C6] bg-white px-5 py-3 text-xs font-semibold uppercase tracking-wider text-oliveDark hover:bg-[#FAF7F0] transition-colors"
+                    >
+                      Send Another Inquiry
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
@@ -334,7 +401,7 @@ export function ContactView() {
                     />
                   </div>
 
-                  <div className="pt-2">
+                  <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
                     <button
                       type="submit"
                       disabled={isSubmitting}
@@ -343,6 +410,11 @@ export function ContactView() {
                       <span>{isSubmitting ? "Transmitting..." : "Send Message"}</span>
                       <ArrowRightIcon className="h-3.5 w-3.5" />
                     </button>
+
+                    <div className="flex items-center gap-2 text-xs font-medium text-oliveMuted">
+                      <WhatsAppIcon className="h-4 w-4 fill-[#25D366]" />
+                      <span>Routes to WhatsApp Concierge</span>
+                    </div>
                   </div>
                 </form>
               )}
