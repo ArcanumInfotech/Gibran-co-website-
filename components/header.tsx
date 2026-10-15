@@ -241,11 +241,8 @@ export function Header() {
                     <button
                       type="button"
                       onClick={() => go(link.href)}
-                      className="group flex w-full items-baseline gap-3 border-b border-[#ECE7DC] py-4 text-left"
+                      className="group flex w-full items-center border-b border-[#ECE7DC] py-4 text-left"
                     >
-                      <span className="font-serif text-xs text-warmGold">
-                        0{index + 1}
-                      </span>
                       <span className="font-serif text-3xl text-oliveDark transition-transform duration-500 ease-editorial group-hover:translate-x-1">
                         {link.label}
                       </span>
@@ -270,13 +267,13 @@ export function Header() {
                 </Link>
                 <div className="flex flex-col gap-1.5 pt-1">
                   <a
-                    href="https://wa.me/917994129471"
+                    href="https://wa.me/97339001234"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-xs font-semibold text-[#25D366] hover:underline"
                   >
                     <WhatsAppIcon className="h-4 w-4 fill-[#25D366]" />
-                    <span>WhatsApp: +91 79941 29471</span>
+                    <span>WhatsApp: +973 3900 1234</span>
                   </a>
                   <p className="text-[11px] uppercase tracking-[0.2em] text-oliveMuted">
                     Tel: +973 123 4567

@@ -52,14 +52,14 @@ export function formatReservationMessage(details: BookingConfirmationDetails): s
   return lines.join("\n");
 }
 
-export const RESTAURANT_WHATSAPP_NUMBER = "917994129471";
-export const RESTAURANT_WHATSAPP_DISPLAY = "+91 79941 29471";
+export const RESTAURANT_WHATSAPP_NUMBER = "97339001234";
+export const RESTAURANT_WHATSAPP_DISPLAY = "+973 3900 1234";
 export const RESTAURANT_EMAIL = "concierge@gibran.com";
 
 export function formatWhatsAppPhone(phone?: string): string {
   if (!phone) return RESTAURANT_WHATSAPP_NUMBER;
   const clean = phone.replace(/[^0-9]/g, "");
-  if (clean.length === 10) return `91${clean}`;
+  if (clean.length === 8) return `973${clean}`;
   if (clean.length >= 8) return clean;
   return RESTAURANT_WHATSAPP_NUMBER;
 }

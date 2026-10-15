@@ -11,8 +11,8 @@ export function ContactSection() {
     {
       title: "WhatsApp Concierge",
       caption: "Instant WhatsApp Chat",
-      value: "+91 79941 29471",
-      href: "https://wa.me/917994129471",
+      value: "+973 3900 1234",
+      href: "https://wa.me/97339001234",
       icon: WhatsAppIcon,
       note: "Click to chat directly with guest concierge",
     },

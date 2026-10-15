@@ -52,7 +52,7 @@ export function ContactView() {
       snapshot.message,
     ];
     const encodedText = encodeURIComponent(messageLines.join("\n"));
-    const whatsappUrl = `https://wa.me/917994129471?text=${encodedText}`;
+    const whatsappUrl = `https://wa.me/97339001234?text=${encodedText}`;
 
     setIsSubmitted(true);
     setIsSubmitting(false);
@@ -67,8 +67,8 @@ export function ContactView() {
     {
       title: "WhatsApp Concierge",
       caption: "Instant WhatsApp Chat",
-      value: "+91 79941 29471",
-      href: "https://wa.me/917994129471",
+      value: "+973 3900 1234",
+      href: "https://wa.me/97339001234",
       icon: WhatsAppIcon,
       note: "Click to chat directly with guest concierge",
     },
@@ -292,7 +292,7 @@ export function ContactView() {
                   {/* Actions: Open in WhatsApp or Send another */}
                   <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
                     <a
-                      href={`https://wa.me/917994129471?text=${encodeURIComponent(
+                      href={`https://wa.me/97339001234?text=${encodeURIComponent(
                         `*New Concierge Inquiry — Gibran & Co.*\n\n*Name:* ${submittedData.name}\n*Phone:* ${submittedData.phone}\n*Email:* ${submittedData.email}\n*Inquiry Topic:* ${submittedData.inquiryType}\n\n*Message:*\n${submittedData.message}`
                       )}`}
                       target="_blank"

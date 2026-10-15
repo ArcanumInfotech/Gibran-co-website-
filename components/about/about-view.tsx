@@ -143,13 +143,17 @@ export function AboutView() {
 
             <div className="grid grid-cols-2 gap-6 pt-4 border-t border-[#ECE7DC]">
               <div>
-                <p className="font-serif text-3xl sm:text-4xl font-normal text-oliveDark">100%</p>
+                <p className="font-sans text-3xl sm:text-4xl font-semibold tracking-tight text-oliveDark">
+                  100%
+                </p>
                 <p className="mt-1 text-xs uppercase tracking-wider text-oliveMuted">
                   Cold-Pressed Virgin Olive Oils
                 </p>
               </div>
               <div>
-                <p className="font-serif text-3xl sm:text-4xl font-normal text-oliveDark">3</p>
+                <p className="font-sans text-3xl sm:text-4xl font-semibold tracking-tight text-oliveDark">
+                  3
+                </p>
                 <p className="mt-1 text-xs uppercase tracking-wider text-oliveMuted">
                   Iconic Regional Houses
                 </p>

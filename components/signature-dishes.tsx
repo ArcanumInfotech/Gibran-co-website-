@@ -67,10 +67,44 @@ export function SignatureDishes() {
       if (!track) return;
       const card = track.children[clamped] as HTMLElement | undefined;
       if (!card) return;
-      track.scrollTo({ left: card.offsetLeft - track.offsetLeft, behavior: "smooth" });
+      const paddingLeft = parseFloat(window.getComputedStyle(track).paddingLeft) || 0;
+      track.scrollTo({ left: Math.max(0, card.offsetLeft - paddingLeft), behavior: "smooth" });
     },
     [maxIndex]
   );
+
+  // Sync carousel active index on touch swipe
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    let timer: ReturnType<typeof setTimeout>;
+    const handleScroll = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        const paddingLeft = parseFloat(window.getComputedStyle(track).paddingLeft) || 0;
+        const scrollLeft = track.scrollLeft;
+        const cards = Array.from(track.children) as HTMLElement[];
+        if (cards.length === 0) return;
+
+        let closest = 0;
+        let minDiff = Infinity;
+        cards.forEach((c, i) => {
+          const target = c.offsetLeft - paddingLeft;
+          const diff = Math.abs(scrollLeft - target);
+          if (diff < minDiff) {
+            minDiff = diff;
+            closest = i;
+          }
+        });
+        setIndex(Math.min(maxIndex, Math.max(0, closest)));
+      }, 60);
+    };
+    track.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      clearTimeout(timer);
+      track.removeEventListener("scroll", handleScroll);
+    };
+  }, [maxIndex]);
 
   /* Arrow-key support while the carousel has focus. */
   const onKeyDown = (event: React.KeyboardEvent) => {
@@ -145,7 +179,7 @@ export function SignatureDishes() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.85, delay: i * 0.09, ease: EASE_EDITORIAL }}
-              className="flex w-[80vw] max-w-[320px] shrink-0 snap-start flex-col sm:w-[calc(50%-0.75rem)] sm:max-w-none lg:w-[calc(25%-1.125rem)]"
+              className="flex w-[calc(100vw-3rem)] shrink-0 snap-start flex-col sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)]"
             >
               <Link
                 href={`/menu?category=signatures&dish=${dish.id}`}
