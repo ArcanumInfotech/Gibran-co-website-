@@ -167,7 +167,8 @@ export function SignatureDishes() {
           aria-label="Signature dishes"
           tabIndex={0}
           onKeyDown={onKeyDown}
-          className="-mx-6 flex snap-x snap-mandatory gap-6 overflow-x-auto px-6 pb-4 outline-none scroll-smooth lg:-mx-12 lg:px-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="-mx-6 flex snap-x snap-mandatory gap-6 overflow-x-auto overflow-y-hidden px-6 pb-4 outline-none scroll-smooth lg:-mx-12 lg:px-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overscroll-x-contain overscroll-y-none"
+          style={{ touchAction: "pan-x pan-y" }}
         >
           {displayDishes.map((dish, i) => (
             <motion.div
@@ -175,10 +176,10 @@ export function SignatureDishes() {
               role="group"
               aria-roledescription="slide"
               aria-label={`${i + 1} of ${displayDishes.length}`}
-              initial={{ opacity: 0, y: 44 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.85, delay: i * 0.09, ease: EASE_EDITORIAL }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "-20px" }}
+              transition={{ duration: 0.6, delay: i * 0.05, ease: EASE_EDITORIAL }}
               className="flex w-[calc(100vw-3rem)] shrink-0 snap-start flex-col sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)]"
             >
               <Link
@@ -187,13 +188,14 @@ export function SignatureDishes() {
                 title={`View ${dish.name} in Menu`}
               >
                 <div>
-                  <div className="relative mb-4 h-48 sm:h-52 w-full overflow-hidden rounded-xl bg-sand">
+                  <div className="relative mb-3 sm:mb-4 h-40 xs:h-44 sm:h-52 w-full overflow-hidden rounded-xl bg-sand select-none">
                     <Image
                       src={dish.image}
                       alt={dish.name}
                       fill
-                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 84vw"
-                      className="h-full w-full object-cover transition-transform duration-700 ease-editorial group-hover:scale-110"
+                      draggable={false}
+                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, calc(100vw - 3rem)"
+                      className="h-full w-full object-cover transition-transform duration-700 ease-editorial group-hover:scale-105 pointer-events-none select-none"
                     />
                     <AnimatePresence>
                       {dish.tag && (
