@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useEffect, useRef } from "react";
 
@@ -129,14 +130,13 @@ export function Hero() {
                 transition={{ duration: 0.9, ease: EASE_EDITORIAL, delay: 0.9 }}
               >
                 <Magnetic strength={0.24}>
-                  <button
-                    type="button"
-                    onClick={() => scrollTo("#about", -88)}
+                  <Link
+                    href="/about"
                     className="btn-ink group"
                   >
                     Discover Our Story
                     <ArrowRightIcon className="h-3.5 w-3.5 transition-transform duration-500 ease-editorial group-hover:translate-x-1.5" />
-                  </button>
+                  </Link>
                 </Magnetic>
               </motion.div>
             </div>

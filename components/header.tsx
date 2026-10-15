@@ -7,7 +7,7 @@ import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-
 import { useEffect, useState } from "react";
 
 import { navLinks } from "@/lib/data";
-import { usePrefersReducedMotion, useSmoothScroll } from "@/components/smooth-scroll-provider";
+import { usePrefersReducedMotion } from "@/components/smooth-scroll-provider";
 import { EASE_EDITORIAL, Magnetic } from "@/components/motion-primitives";
 import { CloseIcon, MenuIcon, WhatsAppIcon } from "@/components/icons";
 
@@ -15,28 +15,31 @@ export function Header() {
   const [hidden, setHidden] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const [active, setActive] = useState<string>("#hero");
+  const [active, setActive] = useState<string>("/");
 
   const pathname = usePathname();
   const router = useRouter();
-  const { scrollTo } = useSmoothScroll();
   const reduced = usePrefersReducedMotion();
   const { scrollY } = useScroll();
 
   /* Automatically highlight active page in navbar */
   useEffect(() => {
-    if (pathname === "/menu") {
-      setActive("#menu");
-    } else if (pathname === "/gallery") {
+    if (pathname.startsWith("/menu")) {
+      setActive("/menu");
+    } else if (pathname.startsWith("/gallery")) {
       setActive("/gallery");
     } else if (
-      pathname === "/reservation" ||
-      pathname === "/reservations" ||
-      pathname === "/book-a-table"
+      pathname.startsWith("/reservation") ||
+      pathname.startsWith("/reservations") ||
+      pathname.startsWith("/book-a-table")
     ) {
-      setActive("#reservations");
-    } else if (pathname === "/about" || pathname === "/about-us") {
-      setActive("#about");
+      setActive("/reservation");
+    } else if (pathname.startsWith("/about") || pathname.startsWith("/about-us")) {
+      setActive("/about");
+    } else if (pathname.startsWith("/contact") || pathname.startsWith("/contact-us")) {
+      setActive("/contact");
+    } else if (pathname === "/") {
+      setActive("/");
     }
   }, [pathname]);
 
@@ -49,33 +52,6 @@ export function Header() {
     else setHidden(false);
   });
 
-  /* Scroll-spy: highlight the section currently occupying the viewport on home. */
-  useEffect(() => {
-    if (pathname !== "/") return;
-
-    const ids = navLinks
-      .filter((link) => link.href.startsWith("#"))
-      .map((link) => link.href.slice(1));
-    const sections = ids
-      .map((id) => document.getElementById(id))
-      .filter((el): el is HTMLElement => Boolean(el));
-
-    if (!sections.length) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible) setActive(`#${visible.target.id}`);
-      },
-      { rootMargin: "-45% 0px -50% 0px", threshold: [0, 0.25, 0.5, 1] }
-    );
-
-    sections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
-  }, [pathname]);
-
   /* Lock body scroll while the drawer is open. */
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -87,47 +63,16 @@ export function Header() {
   const go = (href: string) => {
     setOpen(false);
 
-    if (href === "#menu") {
+    if (href === "/") {
       if (pathname === "/") {
-        window.setTimeout(() => scrollTo("#menu", -88), open ? 260 : 0);
+        window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
-      router.push("/menu");
+      router.push("/");
       return;
     }
 
-    if (href === "#signature") {
-      if (pathname !== "/") {
-        router.push("/#signature");
-        return;
-      }
-      window.setTimeout(() => scrollTo("#signature", -88), open ? 260 : 0);
-      return;
-    }
-
-    if (href === "/gallery" || href === "#gallery") {
-      if (pathname !== "/gallery") {
-        router.push("/gallery");
-      }
-      return;
-    }
-
-    if (href === "#reservations") {
-      if (pathname !== "/") {
-        router.push("/#reservations");
-        return;
-      }
-      window.setTimeout(() => scrollTo("#reservations", -88), open ? 260 : 0);
-      return;
-    }
-
-    if (pathname !== "/" && href.startsWith("#")) {
-      router.push("/" + href);
-      return;
-    }
-
-    // Let the drawer finish closing before Lenis takes over the scroll.
-    window.setTimeout(() => scrollTo(href, -88), open ? 260 : 0);
+    router.push(href);
   };
 
   const headerMotion = reduced
@@ -160,7 +105,7 @@ export function Header() {
             onClick={(event) => {
               if (pathname === "/") {
                 event.preventDefault();
-                go("#hero");
+                window.scrollTo({ top: 0, behavior: "smooth" });
               }
             }}
             className="group flex items-center"
@@ -182,10 +127,15 @@ export function Header() {
             {navLinks.map((link) => {
               const isActive = active === link.href;
               return (
-                <button
+                <Link
                   key={link.href}
-                  type="button"
-                  onClick={() => go(link.href)}
+                  href={link.href}
+                  onClick={(e) => {
+                    if (link.href === "/" && pathname === "/") {
+                      e.preventDefault();
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }
+                  }}
                   className={`group relative transition-colors duration-300 hover:text-oliveDark ${
                     isActive ? "font-semibold text-oliveDark" : ""
                   }`}
@@ -200,7 +150,7 @@ export function Header() {
                   ) : (
                     <span className="absolute -bottom-1.5 left-0 h-[1.5px] w-0 bg-oliveDark transition-all duration-500 ease-editorial group-hover:w-full" />
                   )}
-                </button>
+                </Link>
               );
             })}
           </nav>

@@ -4,45 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { navLinks } from "@/lib/data";
-import { usePrefersReducedMotion, useSmoothScroll } from "@/components/smooth-scroll-provider";
+import { usePrefersReducedMotion } from "@/components/smooth-scroll-provider";
 import { EASE_EDITORIAL } from "@/components/motion-primitives";
 import { WhatsAppIcon } from "@/components/icons";
 
 export function Footer() {
-  const { scrollTo } = useSmoothScroll();
   const reduced = usePrefersReducedMotion();
   const pathname = usePathname();
-  const router = useRouter();
-
-  const go = (href: string) => {
-    if (href === "#menu") {
-      if (pathname === "/") {
-        scrollTo("#menu", -88);
-        return;
-      }
-      router.push("/menu");
-      return;
-    }
-    if (href === "#signature") {
-      if (pathname !== "/") {
-        router.push("/#signature");
-        return;
-      }
-      scrollTo("#signature", -88);
-      return;
-    }
-    if (href === "/gallery" || href === "#gallery") {
-      router.push("/gallery");
-      return;
-    }
-    if (pathname !== "/" && href.startsWith("#")) {
-      router.push("/" + href);
-      return;
-    }
-    scrollTo(href, -88);
-  };
 
   return (
     <footer className="relative w-full max-w-full overflow-hidden border-t border-white/5 bg-forestDark py-16 text-[#A4B0A0]">
@@ -96,18 +66,26 @@ export function Footer() {
 
         <nav className="mt-8 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-[11px] sm:text-xs uppercase tracking-widest text-[#BCC6B8]">
           {navLinks.map((link, i) => (
-            <motion.button
+            <motion.div
               key={link.href}
-              type="button"
-              onClick={() => go(link.href)}
-              className="link-brass !text-[#BCC6B8] hover:!text-white"
               initial={reduced ? undefined : { opacity: 0, y: 12 }}
               whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.36 + i * 0.06, ease: EASE_EDITORIAL }}
             >
-              {link.label}
-            </motion.button>
+              <Link
+                href={link.href}
+                onClick={(e) => {
+                  if (link.href === "/" && pathname === "/") {
+                    e.preventDefault();
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }
+                }}
+                className="link-brass !text-[#BCC6B8] hover:!text-white"
+              >
+                {link.label}
+              </Link>
+            </motion.div>
           ))}
         </nav>
 

@@ -742,8 +742,8 @@ export function ReservationView() {
                   Call Us
                 </span>
                 <a
-                  href="tel:+97317294488"
-                  className="font-serif text-sm font-medium text-white hover:text-[#C5A880] transition-colors sm:text-base"
+                  href="tel:+9731234567"
+                  className="font-sans text-sm font-medium text-white hover:text-[#C5A880] transition-colors sm:text-base tracking-normal"
                 >
                   +973 123 4567
                 </a>

@@ -1,12 +1,12 @@
 import type { IconName } from "@/components/icons";
 
 export const navLinks = [
-  { label: "Home", href: "#hero" },
-  { label: "Menu", href: "#menu" },
+  { label: "Home", href: "/" },
+  { label: "Menu", href: "/menu" },
   { label: "Gallery", href: "/gallery" },
-  { label: "Reservation", href: "#reservations" },
-  { label: "About Us", href: "#about" },
-  { label: "Contact Us", href: "#contact" },
+  { label: "Reservation", href: "/reservation" },
+  { label: "About Us", href: "/about" },
+  { label: "Contact Us", href: "/contact" },
 ] as const;
 
 export const pillars: { title: string; caption: string; icon: IconName }[] = [
