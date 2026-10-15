@@ -31,11 +31,11 @@ export function Pillars() {
         aria-hidden="true"
         animate={reduced ? undefined : { y: [0, -6, 0], rotate: [8, 9.5, 8] }}
         transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-        className="pointer-events-none absolute -top-3 right-[2%] z-0 select-none opacity-90 sm:-top-4 sm:right-[6%] md:-top-5 md:right-[10%] lg:-top-6 lg:right-[12%] xl:right-[14%]"
+        className="pointer-events-none absolute -top-1 -right-3 xs:-right-2 sm:-top-3 sm:right-[4%] md:-top-5 md:right-[10%] lg:-top-6 lg:right-[12%] xl:right-[14%] z-0 select-none opacity-60 sm:opacity-75 md:opacity-90"
       >
         <OliveBranchBotanical
           variant="drape"
-          className="h-64 w-52 sm:h-80 sm:w-64 md:h-[400px] md:w-[320px] lg:h-[480px] lg:w-[380px] xl:h-[540px] xl:w-[420px]"
+          className="h-28 w-24 xs:h-32 xs:w-28 sm:h-52 sm:w-44 md:h-[380px] md:w-[300px] lg:h-[480px] lg:w-[380px] xl:h-[540px] xl:w-[420px]"
         />
       </motion.div>
 
@@ -44,12 +44,12 @@ export function Pillars() {
         aria-hidden="true"
         animate={reduced ? undefined : { y: [0, 8, 0], rotate: [-24, -22, -24] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className="pointer-events-none absolute -left-8 sm:-left-4 lg:left-6 bottom-12 sm:bottom-16 z-0 select-none opacity-40 sm:opacity-50 hidden sm:block"
+        className="pointer-events-none absolute -left-6 bottom-8 sm:-left-4 lg:left-6 sm:bottom-16 z-0 select-none opacity-30 sm:opacity-45 md:opacity-50"
       >
         <OliveBranchBotanical
           variant={2}
           flip
-          className="h-44 w-44 sm:h-56 sm:w-56 lg:h-64 lg:w-64"
+          className="h-28 w-28 sm:h-44 sm:w-44 lg:h-64 lg:w-64"
         />
       </motion.div>
 

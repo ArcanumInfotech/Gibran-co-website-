@@ -232,11 +232,11 @@ export function ReservationView() {
       <motion.div
         animate={{ y: [0, 8, 0], rotate: [2, 3.5, 2] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
-        className="pointer-events-none absolute top-[36%] sm:top-[38%] lg:top-[39%] -left-12 sm:-left-16 md:-left-20 lg:-left-24 xl:-left-28 z-10 select-none opacity-35 sm:opacity-40 transition-opacity duration-700"
+        className="pointer-events-none absolute top-[34%] -left-10 sm:-left-16 md:-left-20 lg:-left-24 xl:-left-28 z-0 select-none opacity-20 sm:opacity-30 md:opacity-40 transition-opacity duration-700"
       >
         <OliveBranchBotanical
           variant="cascade-left"
-          className="w-64 h-[360px] sm:w-80 sm:h-[450px] md:w-[380px] md:h-[530px] lg:w-[460px] lg:h-[640px] xl:w-[520px] xl:h-[720px]"
+          className="w-32 h-[180px] sm:w-64 sm:h-[360px] md:w-[380px] md:h-[530px] lg:w-[460px] lg:h-[640px] xl:w-[520px] xl:h-[720px]"
         />
       </motion.div>
 
@@ -244,11 +244,11 @@ export function ReservationView() {
       <motion.div
         animate={{ y: [0, -6, 0], rotate: [8, 9.5, 8] }}
         transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-        className="pointer-events-none absolute -top-2 right-[2%] z-10 select-none opacity-35 sm:opacity-40 transition-opacity duration-700 sm:-top-3 sm:right-[6%] md:-top-4 md:right-[10%] lg:-top-5 lg:right-[13%] xl:-top-6 xl:right-[15%]"
+        className="pointer-events-none absolute -top-1 -right-3 xs:-right-2 sm:-top-3 sm:right-[6%] md:-top-4 md:right-[10%] lg:-top-5 lg:right-[13%] xl:-top-6 xl:right-[15%] z-0 select-none opacity-30 sm:opacity-35 md:opacity-40 transition-opacity duration-700"
       >
         <OliveBranchBotanical
           variant="drape"
-          className="h-64 w-52 sm:h-80 sm:w-64 md:h-[400px] md:w-[320px] lg:h-[480px] lg:w-[380px] xl:h-[540px] xl:w-[420px]"
+          className="h-28 w-24 xs:h-32 xs:w-28 sm:h-64 sm:w-52 md:h-[400px] md:w-[320px] lg:h-[480px] lg:w-[380px] xl:h-[540px] xl:w-[420px]"
         />
       </motion.div>
 

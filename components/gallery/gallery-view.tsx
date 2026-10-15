@@ -71,8 +71,11 @@ export function GalleryView() {
           Gallery
         </h1>
 
-        {/* Minimal text-only filters with refined underline */}
-        <nav className="mt-6 sm:mt-8 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-[10px] sm:text-[11px] uppercase tracking-[0.18em] sm:tracking-[0.22em] text-[#586255]">
+        {/* Category filter buttons */}
+        <nav
+          className="mt-6 sm:mt-8 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5"
+          aria-label="Gallery category filters"
+        >
           {categories.map((cat) => {
             const isActive = activeCategory === cat.id;
             return (
@@ -80,20 +83,22 @@ export function GalleryView() {
                 key={cat.id}
                 type="button"
                 onClick={() => setActiveCategory(cat.id)}
-                className={`relative py-1 transition-colors duration-200 ${
+                className={`relative shrink-0 rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-xs font-medium uppercase tracking-wider transition-all duration-300 cursor-pointer ${
                   isActive
-                    ? "font-semibold text-[#1C241B]"
-                    : "text-[#586255]/70 hover:text-[#1C241B]"
+                    ? "text-white shadow-md shadow-[#6d7835]/25"
+                    : "border border-[#ECE7DC] bg-white/85 text-[#1C241B] hover:border-[#6d7835]/40 hover:bg-white hover:text-[#6d7835] hover:shadow-xs"
                 }`}
               >
-                <span>{cat.label}</span>
                 {isActive && (
-                  <motion.div
-                    layoutId="activeFilterIndicator"
-                    className="absolute -bottom-0.5 inset-x-0 h-px bg-[#1C241B]"
-                    transition={{ duration: 0.25 }}
+                  <motion.span
+                    layoutId="galleryFilterPill"
+                    className="absolute inset-0 rounded-full bg-[#6d7835]"
+                    transition={{ duration: 0.35, ease: "easeInOut" }}
                   />
                 )}
+                <span className="relative z-10 whitespace-nowrap">
+                  {cat.label}
+                </span>
               </button>
             );
           })}

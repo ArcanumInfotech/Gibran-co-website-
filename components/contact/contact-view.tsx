@@ -121,11 +121,11 @@ export function ContactView() {
         <motion.div
           animate={reduced ? undefined : { y: [0, 8, 0], rotate: [2, 3.5, 2] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
-          className="pointer-events-none absolute top-[30%] -left-12 sm:-left-16 md:-left-20 lg:-left-24 z-10 select-none opacity-35 sm:opacity-40 transition-opacity duration-700"
+          className="pointer-events-none absolute top-[28%] -left-10 sm:-left-16 md:-left-20 lg:-left-24 z-0 select-none opacity-20 sm:opacity-30 md:opacity-40 transition-opacity duration-700"
         >
           <OliveBranchBotanical
             variant="cascade-left"
-            className="w-64 h-[360px] sm:w-80 sm:h-[450px] md:w-[380px] md:h-[530px] lg:w-[460px] lg:h-[640px]"
+            className="w-32 h-[180px] sm:w-64 sm:h-[360px] md:w-[380px] md:h-[530px] lg:w-[460px] lg:h-[640px]"
           />
         </motion.div>
 
