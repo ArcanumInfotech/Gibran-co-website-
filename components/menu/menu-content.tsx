@@ -87,6 +87,7 @@ export function MenuContent() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isPlayingBannerVideo, setIsPlayingBannerVideo] = useState(false);
   const [selectedDishes, setSelectedDishes] = useState<SelectedDishItem[]>([]);
+  const [isMobileSidebarExpanded, setIsMobileSidebarExpanded] = useState(false);
 
   useEffect(() => {
     setSelectedDishes(getSelectedDishes());
@@ -151,6 +152,18 @@ export function MenuContent() {
       ...prev,
       [groupId]: !prev[groupId],
     }));
+  };
+
+  const handleSelectSubgroup = (groupId: string, subgroupId: string) => {
+    setActiveGroupId(groupId);
+    setActiveSubgroupId(subgroupId);
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      setIsMobileSidebarExpanded(false);
+      setTimeout(() => {
+        const target = document.getElementById("menu-category-banner");
+        target?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 120);
+    }
   };
 
   // Active Group object
@@ -264,165 +277,229 @@ export function MenuContent() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-              className="relative rounded-[1.75rem] border border-[#ECE5D6] bg-[#F4EFE6] p-5 shadow-xs sm:p-6 max-h-[calc(100vh-7.5rem)] overflow-y-auto overscroll-contain"
+              className="relative rounded-[1.75rem] border border-[#ECE5D6] bg-[#F4EFE6] p-4 sm:p-5 lg:p-6 shadow-xs lg:max-h-[calc(100vh-7.5rem)] lg:overflow-y-auto lg:overscroll-contain"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "#D5C9B3 transparent",
               }}
             >
+              {/* MOBILE COLLAPSIBLE TOGGLE HEADER */}
+              <div className="flex items-center justify-between lg:hidden">
+                <button
+                  type="button"
+                  onClick={() => setIsMobileSidebarExpanded((prev) => !prev)}
+                  className="flex flex-1 items-center gap-2.5 text-left"
+                  aria-expanded={isMobileSidebarExpanded}
+                >
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-sm shadow-xs border border-[#ECE5D6]">
+                    🌿
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6E7569] block">
+                      Menu Categories
+                    </span>
+                    <span className="font-serif text-sm font-semibold text-[#1C241B] truncate flex items-center gap-1.5">
+                      <span className="truncate">{activeGroup.name}</span>
+                      <span className="text-[#9A7B4F] shrink-0">•</span>
+                      <span className="font-sans text-xs font-normal text-[#5A6355] truncate">
+                        {activeSubgroup ? activeSubgroup.name : "All Sections"}
+                      </span>
+                    </span>
+                  </div>
+                </button>
 
-              {/* Tag / Eyebrow */}
-              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-[#6E7569]">
-                <span className="text-xs">🌿</span>
-                <span>Culinary Curation</span>
+                <div className="flex items-center gap-2 shrink-0 ml-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileSidebarExpanded((prev) => !prev)}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-[#D5C9B3] bg-white px-3.5 py-1.5 text-[11px] font-semibold text-[#1C241B] shadow-xs active:bg-[#FAF7F0] transition-colors"
+                  >
+                    <span>{isMobileSidebarExpanded ? "Hide" : "Categories"}</span>
+                    <span
+                      className={`text-[9px] text-[#6d7835] transition-transform duration-300 ${
+                        isMobileSidebarExpanded ? "rotate-180" : "rotate-0"
+                      }`}
+                    >
+                      ▼
+                    </span>
+                  </button>
+                </div>
               </div>
 
-              {/* Title & Description */}
-              <h2 className="mt-2 font-serif text-3xl font-normal leading-tight text-[#1C241B]">
-                <SplitText text="Our Menu" as="span" delay={0.15} immediate />
-              </h2>
-              <p className="mt-2 text-xs leading-relaxed text-[#6E7569]">
-                Browse our menu by category group, then expand each section below.
-              </p>
+              {/* DESKTOP SIDEBAR HEADER */}
+              <div className="hidden lg:block">
+                {/* Tag / Eyebrow */}
+                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-[#6E7569]">
+                  <span className="text-xs">🌿</span>
+                  <span>Culinary Curation</span>
+                </div>
 
-              {/* Group & Subgroups Navigation List */}
-              <nav className="mt-6 space-y-3">
-                {menuState.groups.map((group) => {
-                  const isGroupActive = activeGroupId === group.id;
-                  const isExpanded = !!openGroupIds[group.id];
-                  const subsForThisGroup = menuState.subgroups.filter(
-                    (s) => s.groupId === group.id
-                  );
-                  const totalGroupDishes = menuState.items.filter(
-                    (i) => i.groupId === group.id
-                  ).length;
+                {/* Title & Description */}
+                <h2 className="mt-2 font-serif text-3xl font-normal leading-tight text-[#1C241B]">
+                  <SplitText text="Our Menu" as="span" delay={0.15} immediate />
+                </h2>
+                <p className="mt-2 text-xs leading-relaxed text-[#6E7569]">
+                  Browse our menu by category group, then expand each section below.
+                </p>
+              </div>
 
-                  return (
-                    <div
-                      key={group.id}
-                      className="rounded-2xl border border-[#ECE5D6] bg-white/60 p-1.5 transition-colors"
-                    >
-                      {/* GROUP HEADER & DROPDOWN TOGGLE BUTTON */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setActiveGroupId(group.id);
-                          setActiveSubgroupId("all");
-                          toggleGroupOpen(group.id);
-                        }}
-                        className={`group flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold transition-all ${
-                          isGroupActive
-                            ? "bg-[#1C241B] text-white shadow-sm"
-                            : "text-[#2C3529] hover:bg-white hover:text-[#1C241B]"
-                        }`}
+              {/* GROUP & SUBGROUPS NAVIGATION LIST */}
+              <div
+                className={`${
+                  isMobileSidebarExpanded ? "block" : "hidden"
+                } lg:block mt-3 lg:mt-6 pt-3 lg:pt-0 border-t border-[#ECE5D6] lg:border-t-0`}
+              >
+                {/* Mobile Quick Action Link */}
+                <div className="mb-3 flex items-center justify-between lg:hidden">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#7A8374]">
+                    Tap a section to view:
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMobileSidebarExpanded(false);
+                      const target = document.getElementById("menu-category-banner");
+                      target?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#6d7835] hover:underline"
+                  >
+                    <span>Skip to dishes</span>
+                    <span>↓</span>
+                  </button>
+                </div>
+
+                <nav className="space-y-3">
+                  {menuState.groups.map((group) => {
+                    const isGroupActive = activeGroupId === group.id;
+                    const isExpanded = !!openGroupIds[group.id];
+                    const subsForThisGroup = menuState.subgroups.filter(
+                      (s) => s.groupId === group.id
+                    );
+                    const totalGroupDishes = menuState.items.filter(
+                      (i) => i.groupId === group.id
+                    ).length;
+
+                    return (
+                      <div
+                        key={group.id}
+                        className="rounded-2xl border border-[#ECE5D6] bg-white/60 p-1.5 transition-colors"
                       >
-                        <span className="flex items-center gap-2">
-                          <span className="text-sm">
-                            {group.id === "food" ? "🍽️" : group.id === "beverages" ? "🍸" : "✨"}
+                        {/* GROUP HEADER & DROPDOWN TOGGLE BUTTON */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveGroupId(group.id);
+                            setActiveSubgroupId("all");
+                            toggleGroupOpen(group.id);
+                          }}
+                          className={`group flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold transition-all ${
+                            isGroupActive
+                              ? "bg-[#1C241B] text-white shadow-sm"
+                              : "text-[#2C3529] hover:bg-white hover:text-[#1C241B]"
+                          }`}
+                        >
+                          <span className="flex items-center gap-2">
+                            <span className="text-sm">
+                              {group.id === "food" ? "🍽️" : group.id === "beverages" ? "🍸" : "✨"}
+                            </span>
+                            <span className="tracking-wide uppercase text-[11px] font-bold">
+                              {group.name}
+                            </span>
                           </span>
-                          <span className="tracking-wide uppercase text-[11px] font-bold">
-                            {group.name}
-                          </span>
-                        </span>
 
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`rounded-full px-2 py-0.5 text-[10px] font-mono ${
-                              isGroupActive
-                                ? "bg-white/20 text-white"
-                                : "bg-[#FAF7F0] text-[#7A8374]"
-                            }`}
-                          >
-                            {totalGroupDishes}
-                          </span>
-                          <span
-                            className={`text-[9px] transition-transform duration-200 ${
-                              isExpanded ? "rotate-180" : "rotate-0"
-                            }`}
-                          >
-                            ▼
-                          </span>
-                        </div>
-                      </button>
-
-                      {/* SUBGROUPS DROPDOWN ACCORDION (shown below group) */}
-                      <AnimatePresence initial={false}>
-                        {isExpanded && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.22, ease: "easeInOut" }}
-                            className="overflow-hidden pl-2 pr-1 pt-1.5 pb-1 space-y-1"
-                          >
-                            {/* Option 1: View all in this group */}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setActiveGroupId(group.id);
-                                setActiveSubgroupId("all");
-                              }}
-                              className={`group flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[11px] transition-colors ${
-                                isGroupActive && activeSubgroupId === "all"
-                                  ? "bg-[#6d7835] font-semibold text-white shadow-xs"
-                                  : "text-[#5A6355] hover:bg-white/80 hover:text-[#1C241B]"
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-[10px] font-mono ${
+                                isGroupActive
+                                  ? "bg-white/20 text-white"
+                                  : "bg-[#FAF7F0] text-[#7A8374]"
                               }`}
                             >
-                              <span className="flex items-center gap-2">
-                                <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" />
-                                <span>All {group.name}</span>
-                              </span>
-                              <span className="text-[10px] font-mono opacity-80">
-                                {totalGroupDishes}
-                              </span>
-                            </button>
+                              {totalGroupDishes}
+                            </span>
+                            <span
+                              className={`text-[9px] transition-transform duration-200 ${
+                                isExpanded ? "rotate-180" : "rotate-0"
+                              }`}
+                            >
+                              ▼
+                            </span>
+                          </div>
+                        </button>
 
-                            {/* Option 2: Each individual subgroup */}
-                            {subsForThisGroup.map((sub) => {
-                              const isSubActive =
-                                isGroupActive && activeSubgroupId === sub.id;
-                              const subCount = menuState.items.filter(
-                                (i) => i.subgroupId === sub.id
-                              ).length;
+                        {/* SUBGROUPS DROPDOWN ACCORDION (shown below group) */}
+                        <AnimatePresence initial={false}>
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.22, ease: "easeInOut" }}
+                              className="overflow-hidden pl-2 pr-1 pt-1.5 pb-1 space-y-1"
+                            >
+                              {/* Option 1: View all in this group */}
+                              <button
+                                type="button"
+                                onClick={() => handleSelectSubgroup(group.id, "all")}
+                                className={`group flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[11px] transition-colors ${
+                                  isGroupActive && activeSubgroupId === "all"
+                                    ? "bg-[#6d7835] font-semibold text-white shadow-xs"
+                                    : "text-[#5A6355] hover:bg-white/80 hover:text-[#1C241B]"
+                                }`}
+                              >
+                                <span className="flex items-center gap-2">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" />
+                                  <span>All {group.name}</span>
+                                </span>
+                                <span className="text-[10px] font-mono opacity-80">
+                                  {totalGroupDishes}
+                                </span>
+                              </button>
 
-                              return (
-                                <button
-                                  key={sub.id}
-                                  type="button"
-                                  onClick={() => {
-                                    setActiveGroupId(group.id);
-                                    setActiveSubgroupId(sub.id);
-                                  }}
-                                  className={`group flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[11px] transition-colors ${
-                                    isSubActive
-                                      ? "bg-[#6d7835] font-semibold text-white shadow-xs"
-                                      : "text-[#5A6355] hover:bg-white/80 hover:text-[#1C241B]"
-                                  }`}
-                                >
-                                  <span className="flex items-center gap-2 truncate">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" />
-                                    <span className="truncate">{sub.name}</span>
-                                  </span>
-                                  <span className="text-[10px] font-mono opacity-80 shrink-0 ml-1">
-                                    {subCount}
-                                  </span>
-                                </button>
-                              );
-                            })}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  );
-                })}
-              </nav>
+                              {/* Option 2: Each individual subgroup */}
+                              {subsForThisGroup.map((sub) => {
+                                const isSubActive =
+                                  isGroupActive && activeSubgroupId === sub.id;
+                                const subCount = menuState.items.filter(
+                                  (i) => i.subgroupId === sub.id
+                                ).length;
 
-              {/* Bottom Script Signature */}
-              <div className="mt-8 flex items-center justify-between border-t border-[#EAE3D4] pt-4">
-                <span className="font-script text-xl text-[#7A8A76]">
-                  Seasonal organic produce
-                </span>
-                <span className="text-sm text-[#8A9A86]">🍃</span>
+                                return (
+                                  <button
+                                    key={sub.id}
+                                    type="button"
+                                    onClick={() => handleSelectSubgroup(group.id, sub.id)}
+                                    className={`group flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[11px] transition-colors ${
+                                      isSubActive
+                                        ? "bg-[#6d7835] font-semibold text-white shadow-xs"
+                                        : "text-[#5A6355] hover:bg-white/80 hover:text-[#1C241B]"
+                                    }`}
+                                  >
+                                    <span className="flex items-center gap-2 truncate">
+                                      <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" />
+                                      <span className="truncate">{sub.name}</span>
+                                    </span>
+                                    <span className="text-[10px] font-mono opacity-80 shrink-0 ml-1">
+                                      {subCount}
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    );
+                  })}
+                </nav>
+
+                {/* Bottom Script Signature */}
+                <div className="mt-6 lg:mt-8 flex items-center justify-between border-t border-[#EAE3D4] pt-4">
+                  <span className="font-script text-xl text-[#7A8A76]">
+                    Seasonal organic produce
+                  </span>
+                  <span className="text-sm text-[#8A9A86]">🍃</span>
+                </div>
               </div>
             </motion.div>
           </aside>

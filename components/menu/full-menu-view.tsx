@@ -196,7 +196,7 @@ export function FullMenuView({
           {/* ============================================================== */}
           <aside className="w-full shrink-0 lg:w-64 xl:w-72 lg:sticky lg:top-24 lg:self-start z-20">
             <div
-              className="rounded-3xl border border-[#ECE5D6] bg-[#F4EFE6] p-5 shadow-xs sm:p-6 max-h-[calc(100vh-7.5rem)] overflow-y-auto overscroll-contain"
+              className="rounded-3xl border border-[#ECE5D6] bg-[#F4EFE6] p-4 sm:p-5 lg:p-6 shadow-xs lg:max-h-[calc(100vh-7.5rem)] lg:overflow-y-auto lg:overscroll-contain"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "#D5C9B3 transparent",
