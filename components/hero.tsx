@@ -57,7 +57,8 @@ export function Hero() {
         >
           <video
             ref={videoRef}
-            src="/video/coffee.mp4"
+            src="/video/gibran-story.mp4"
+            poster="/assets/gallery/gibran-story-poster.jpg"
             autoPlay
             loop
             muted

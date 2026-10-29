@@ -8,13 +8,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { signatureDishes } from "@/lib/data";
 import { subscribeToFirebaseMenu, MenuDataState } from "@/lib/firebase-menu";
 import { EASE_EDITORIAL, SplitText } from "@/components/motion-primitives";
-import { ArrowLeftIcon, ArrowRightIcon } from "@/components/icons";
+import { ArrowLeftIcon, ArrowRightIcon, PauseIcon, PlayIcon } from "@/components/icons";
 
 export function SignatureDishes() {
   const trackRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   const [perView, setPerView] = useState(4);
   const [menuState, setMenuState] = useState<MenuDataState | null>(null);
+  const [isAutoPlay, setIsAutoPlay] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
 
   // Real-time synchronization directly with Firebase Firestore / Admin updates
   useEffect(() => {
@@ -73,6 +75,33 @@ export function SignatureDishes() {
     [maxIndex]
   );
 
+  // Auto-scroll through dishes seamlessly with pause on hover/interaction
+  useEffect(() => {
+    if (!isAutoPlay || isHovered || maxIndex <= 0) return;
+
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      setIndex((curr) => {
+        const next = curr >= maxIndex ? 0 : curr + 1;
+        const track = trackRef.current;
+        if (track) {
+          const card = track.children[next] as HTMLElement | undefined;
+          if (card) {
+            const paddingLeft = parseFloat(window.getComputedStyle(track).paddingLeft) || 0;
+            track.scrollTo({ left: Math.max(0, card.offsetLeft - paddingLeft), behavior: "smooth" });
+          }
+        }
+        return next;
+      });
+    }, 3800);
+
+    return () => clearInterval(interval);
+  }, [isAutoPlay, isHovered, maxIndex]);
+
   // Sync carousel active index on touch swipe
   useEffect(() => {
     const track = trackRef.current;
@@ -110,11 +139,11 @@ export function SignatureDishes() {
   const onKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === "ArrowRight") {
       event.preventDefault();
-      scrollToCard(index + 1);
+      scrollToCard(index >= maxIndex ? 0 : index + 1);
     }
     if (event.key === "ArrowLeft") {
       event.preventDefault();
-      scrollToCard(index - 1);
+      scrollToCard(index <= 0 ? maxIndex : index - 1);
     }
   };
 
@@ -141,23 +170,45 @@ export function SignatureDishes() {
             </h2>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              type="button"
+              aria-label={isAutoPlay ? "Pause auto-scroll" : "Start auto-scroll"}
+              title={isAutoPlay ? "Pause auto-scroll" : "Start auto-scroll"}
+              onClick={() => setIsAutoPlay((prev) => !prev)}
+              className="group flex h-10 w-10 items-center justify-center rounded-full border border-oliveDark/20 text-oliveDark transition-all duration-300 ease-editorial hover:border-[#6d7835] hover:bg-[#6d7835] hover:text-white"
+            >
+              {isAutoPlay ? (
+                <PauseIcon className="h-3.5 w-3.5 fill-current" />
+              ) : (
+                <PlayIcon className="h-3.5 w-3.5 fill-current ml-0.5" />
+              )}
+            </button>
             <CarouselButton
               label="Previous dishes"
-              onClick={() => scrollToCard(index - 1)}
-              disabled={index === 0}
+              onClick={() => scrollToCard(index <= 0 ? maxIndex : index - 1)}
             >
               <ArrowLeftIcon className="h-4 w-4" />
             </CarouselButton>
             <CarouselButton
               label="Next dishes"
-              onClick={() => scrollToCard(index + 1)}
-              disabled={index >= maxIndex}
+              onClick={() => scrollToCard(index >= maxIndex ? 0 : index + 1)}
             >
               <ArrowRightIcon className="h-4 w-4" />
             </CarouselButton>
           </div>
         </div>
+
+        {/* Track with hover & touch pauses */}
+        <div
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          onTouchStart={() => setIsHovered(true)}
+          onTouchEnd={() => {
+            setTimeout(() => setIsHovered(false), 2000);
+          }}
+          className="relative"
+        >
 
         {/* Track */}
         <div
@@ -235,6 +286,7 @@ export function SignatureDishes() {
               </Link>
             </motion.div>
           ))}
+        </div>
         </div>
 
         {/* Progress rail */}
