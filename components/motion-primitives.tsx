@@ -123,7 +123,7 @@ export function SplitText({
   }
 
   const revealed = { y: "0%", opacity: 1, rotate: 0 };
-  const hidden = { y: "110%", opacity: 0, rotate: 2 };
+  const hidden = { y: "115%", opacity: 0, rotate: 2 };
 
   const wordVariants = {
     hidden,
@@ -138,10 +138,13 @@ export function SplitText({
         // `overflow-hidden` box, and IntersectionObserver accounts for
         // clipping ancestors — so an inner trigger reports "not visible"
         // forever and the reveal never runs.
+        // We include generous horizontal and vertical padding (compensated by
+        // matching negative margins) so italic overhangs, serifs, flourishes,
+        // and descenders/ascenders are never cut off by the overflow mask.
         <motion.span
           // eslint-disable-next-line react/no-array-index-key -- words repeat by design
           key={`${word}-${i}`}
-          className="inline-block overflow-hidden align-bottom"
+          className="inline-block overflow-hidden align-bottom px-[0.3em] -mx-[0.3em] py-[0.15em] -my-[0.15em]"
           initial="hidden"
           {...(immediate
             ? { animate: "show" }

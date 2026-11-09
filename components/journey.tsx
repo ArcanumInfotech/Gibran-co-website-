@@ -182,7 +182,7 @@ function SlideCopy({ slide }: { slide: (typeof journeySlides)[number] }) {
         </span>
       </MaskLine>
 
-      <h2 className="font-serif text-3xl sm:text-5xl lg:text-[62px] font-normal leading-[1.12] sm:leading-[1.08] tracking-tight text-[#FAF8F5]">
+      <h2 className="font-serif text-3xl sm:text-5xl lg:text-[62px] font-normal leading-[1.18] sm:leading-[1.14] tracking-tight text-[#FAF8F5]">
         <MaskLine>
           <span className="block">{slide.line1}</span>
         </MaskLine>
@@ -212,9 +212,9 @@ function SlideCopy({ slide }: { slide: (typeof journeySlides)[number] }) {
 function MaskLine({ children }: { children: React.ReactNode }) {
   return (
     <motion.span
-      className="block overflow-hidden"
+      className="block overflow-hidden px-[0.3em] -mx-[0.3em] pt-[0.1em] -mt-[0.1em] pb-[0.4em] -mb-[0.4em]"
       variants={{
-        hidden: { y: "115%", opacity: 0 },
+        hidden: { y: "130%", opacity: 0 },
         show: {
           y: "0%",
           opacity: 1,

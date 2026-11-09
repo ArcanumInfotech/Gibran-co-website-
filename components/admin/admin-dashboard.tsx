@@ -18,7 +18,6 @@ import {
   getMenuFromFirebase,
   subscribeToFirebaseMenu,
   deleteDishFromFirebase,
-  clearAllDishesFromFirebase,
   addGroupToFirebase,
   updateGroupInFirebase,
   deleteGroupFromFirebase,
@@ -26,7 +25,6 @@ import {
   updateSubgroupInFirebase,
   deleteSubgroupFromFirebase,
   checkFirestoreConnection,
-  seedSampleLebaneseDishes,
   MenuDataState,
 } from "@/lib/firebase-menu";
 
@@ -56,7 +54,6 @@ export function AdminDashboard({
   const [isAddDishModalOpen, setIsAddDishModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
-  const [isClearDishesConfirmOpen, setIsClearDishesConfirmOpen] = useState(false);
 
   // Group / Subgroup Edit Modal States
   const [isAddGroupModalOpen, setIsAddGroupModalOpen] = useState(false);
@@ -122,7 +119,6 @@ export function AdminDashboard({
   useEffect(() => {
     const hasOpenModal =
       !!itemToDelete ||
-      isClearDishesConfirmOpen ||
       isAddGroupModalOpen ||
       !!editingGroup ||
       !!groupToDelete ||
@@ -139,7 +135,6 @@ export function AdminDashboard({
     };
   }, [
     itemToDelete,
-    isClearDishesConfirmOpen,
     isAddGroupModalOpen,
     editingGroup,
     groupToDelete,
@@ -233,37 +228,6 @@ export function AdminDashboard({
       showToast("Error deleting dish");
     } finally {
       setItemToDelete(null);
-      setIsLoading(false);
-    }
-  };
-
-  const handleClearAllDishesConfirm = async () => {
-    setIsLoading(true);
-    try {
-      const res = await clearAllDishesFromFirebase(menuState);
-      if (res.success) {
-        setMenuState(res.state);
-        showToast("All custom dishes cleared. Menu is ready for fresh entries.");
-      }
-    } catch {
-      showToast("Error clearing dishes");
-    } finally {
-      setIsClearDishesConfirmOpen(false);
-      setIsLoading(false);
-    }
-  };
-
-  const handleSeedLebaneseDishes = async () => {
-    setIsLoading(true);
-    try {
-      const res = await seedSampleLebaneseDishes(menuState);
-      if (res.success) {
-        setMenuState(res.state);
-        showToast(`Loaded ${res.count} authentic Lebanese fine dining creations!`);
-      }
-    } catch (err: unknown) {
-      showToast(err instanceof Error ? err.message : "Error loading sample dishes");
-    } finally {
       setIsLoading(false);
     }
   };
@@ -569,17 +533,6 @@ export function AdminDashboard({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={handleSeedLebaneseDishes}
-              disabled={isLoading}
-              title="Quick-load 12 authentic Lebanese fine dining dishes with photography"
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#6d7835] bg-[#6d7835]/10 px-3 py-1.5 text-xs font-semibold text-[#545e26] hover:bg-[#6d7835]/20 transition-colors"
-            >
-              <span>⚡</span>
-              <span>Load Lebanese Tasting Menu</span>
-            </button>
-
-            <button
-              type="button"
               onClick={refreshMenu}
               disabled={isLoading}
               title="Refresh from Firebase"
@@ -588,18 +541,6 @@ export function AdminDashboard({
               <span>🔄</span>
               <span>Sync Firestore</span>
             </button>
-
-            {totalDishes > 0 && (
-              <button
-                type="button"
-                onClick={() => setIsClearDishesConfirmOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50/70 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100 transition-colors"
-                title="Remove all dishes and start fresh"
-              >
-                <span>🗑️</span>
-                <span>Clear All Dishes</span>
-              </button>
-            )}
           </div>
         </div>
 
@@ -1398,59 +1339,6 @@ export function AdminDashboard({
                   className="rounded-full bg-red-600 px-5 py-2 text-xs font-semibold uppercase tracking-wider text-white shadow hover:bg-red-700"
                 >
                   Yes, Delete Dish
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ============================================================== */}
-      {/* CONFIRMATION 2: CLEAR ALL DISHES */}
-      {/* ============================================================== */}
-      <AnimatePresence>
-        {isClearDishesConfirmOpen && (
-          <motion.div
-            data-lenis-prevent="true"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm overscroll-contain"
-            onClick={() => setIsClearDishesConfirmOpen(false)}
-          >
-            <motion.div
-              data-lenis-prevent="true"
-              initial={{ scale: 0.95, y: 12 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 12 }}
-              className="w-full max-w-sm rounded-2xl border border-[#D5C9B3] bg-white p-6 shadow-2xl text-center overscroll-contain"
-              onClick={(e) => e.stopPropagation()}
-              onWheel={(e) => e.stopPropagation()}
-            >
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-800 text-xl font-bold mb-4">
-                🗑️
-              </div>
-              <h3 className="font-serif text-lg font-normal text-[#1C241B]">
-                Clear All Dishes?
-              </h3>
-              <p className="mt-2 text-xs text-[#6E7569] leading-relaxed">
-                This will remove all current dishes from the menu, leaving an empty menu ready for your own fresh entries. Your Groups and Subgroups will be kept.
-              </p>
-
-              <div className="mt-6 flex items-center justify-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsClearDishesConfirmOpen(false)}
-                  className="rounded-full border border-[#D5C9B3] px-4 py-2 text-xs font-semibold text-[#5A6355] hover:bg-[#FAF7F0]"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleClearAllDishesConfirm}
-                  className="rounded-full bg-red-600 px-5 py-2 text-xs font-semibold uppercase tracking-wider text-white shadow hover:bg-red-700"
-                >
-                  Clear All Dishes
                 </button>
               </div>
             </motion.div>

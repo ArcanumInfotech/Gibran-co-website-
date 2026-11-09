@@ -77,14 +77,15 @@ export function MoodSection() {
             </h2>
 
             <motion.p
-              className="max-w-lg text-sm font-light leading-relaxed text-[#B5BFB2] sm:text-base"
+              className="max-w-xl text-sm font-light leading-relaxed text-[#B5BFB2] sm:text-base"
               initial={reduced ? undefined : { opacity: 0, y: 20 }}
               whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.9, ease: EASE_EDITORIAL, delay: 0.45 }}
             >
               Immerse yourself in a world of rich flavors, tailored wine pairings,
-              and impeccable service. Welcome to the sanctuary of Gibran &amp; Co.
+              and impeccable service. Welcome to the sanctuary of{" "}
+              <span className="whitespace-nowrap">Gibran &amp; Co.</span>
             </motion.p>
 
             <motion.div
