@@ -118,6 +118,15 @@ function normalizeFirestoreData(data: Record<string, unknown> | undefined): Menu
     };
   });
 
+  // Deduplicate items so duplicate entries never appear
+  const seenDishNames = new Set<string>();
+  items = items.filter((it) => {
+    const key = (it.name || "").trim().toLowerCase();
+    if (!key || seenDishNames.has(key)) return false;
+    seenDishNames.add(key);
+    return true;
+  });
+
   const categories = buildCategoriesFromGroups(groups, subgroups, items);
 
   return { groups, subgroups, items, categories };
@@ -764,7 +773,18 @@ export const AUTHENTIC_LEBANESE_DISHES: Omit<MenuItem, "id">[] = [
 export async function seedSampleLebaneseDishes(
   currentState: MenuDataState
 ): Promise<{ success: boolean; state: MenuDataState; count: number }> {
-  const newDishes: MenuItem[] = AUTHENTIC_LEBANESE_DISHES.map((d, index) => ({
+  const existingNames = new Set(
+    currentState.items.map((it) => it.name.trim().toLowerCase())
+  );
+  const dishesToAdd = AUTHENTIC_LEBANESE_DISHES.filter(
+    (d) => !existingNames.has(d.name.trim().toLowerCase())
+  );
+
+  if (dishesToAdd.length === 0) {
+    return { success: true, state: currentState, count: 0 };
+  }
+
+  const newDishes: MenuItem[] = dishesToAdd.map((d, index) => ({
     ...d,
     id: `lebanese_dish_${Date.now()}_${index}`,
     createdAt: Date.now() + index,

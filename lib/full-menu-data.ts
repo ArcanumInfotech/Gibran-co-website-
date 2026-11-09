@@ -130,9 +130,11 @@ export function buildCategoriesFromGroups(
 
   return subgroups.map((sub) => {
     const parentGroup = groups.find((g) => g.id === sub.groupId);
-    const subItems = items.filter(
-      (item) => item.subgroupId === sub.id || (!item.subgroupId && item.groupId === sub.groupId)
-    );
+    const subItems = items.filter((item) => {
+      if (item.subgroupId) return item.subgroupId === sub.id;
+      const firstSub = subgroups.find((s) => s.groupId === item.groupId);
+      return firstSub?.id === sub.id;
+    });
 
     const subLower = (sub.id + " " + sub.name).toLowerCase();
     const icon = subLower.includes("bever") || subLower.includes("drink") || subLower.includes("mocktail") || subLower.includes("coffee")

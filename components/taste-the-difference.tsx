@@ -51,9 +51,11 @@ export function TasteTheDifference() {
 
     // Subgroups from Firebase with active dishes
     menuState.subgroups.forEach((sub) => {
-      const subItems = menuState.items.filter(
-        (it) => it.subgroupId === sub.id || (!it.subgroupId && it.groupId === sub.groupId)
-      );
+      const subItems = menuState.items.filter((it) => {
+        if (it.subgroupId) return it.subgroupId === sub.id;
+        const firstSub = menuState.subgroups.find((s) => s.groupId === it.groupId);
+        return firstSub?.id === sub.id;
+      });
       if (subItems.length > 0) {
         cats.push({
           id: sub.id,
