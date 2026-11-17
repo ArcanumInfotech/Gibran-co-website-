@@ -206,12 +206,12 @@ export const menuCategories: MenuCategory[] = [
 ];
 
 export const marqueeItems = [
-  "Fresh Ingredients",
-  "Timeless Recipes",
-  "Slow Hospitality",
-  "Levantine Craft",
-  "Seasonal & Local",
-  "Unhurried Dining",
+  "Warm Bread",
+  "Strong Coffee",
+  "For The Other Half Of Your Hunger",
+  "Modern Lebanese Deli",
+  "Plates Passed & Stories Unfolded",
+  "You Are The & Co.",
 ];
 
 /**
@@ -255,20 +255,20 @@ export const infoStrip: {
   icon: IconName;
   id?: string;
 }[] = [
-  {
-    label: "Location",
-    value: "Bahrain / Abu Dhabi & Beirut",
-    icon: "pin",
-  },
-  {
-    label: "Open Hours",
-    value: "12:00 PM – 11:00 PM (Daily)",
-    icon: "clock",
-  },
-  {
-    label: "Call Us",
-    value: "+973 123 4567",
-    icon: "phone",
-    id: "contact",
-  },
-];
+    {
+      label: "Location",
+      value: "Bahrain / Abu Dhabi & Beirut",
+      icon: "pin",
+    },
+    {
+      label: "Open Hours",
+      value: "12:00 PM – 11:00 PM (Daily)",
+      icon: "clock",
+    },
+    {
+      label: "Call Us",
+      value: "+973 123 4567",
+      icon: "phone",
+      id: "contact",
+    },
+  ];

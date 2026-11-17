@@ -83,8 +83,7 @@ export function MoodSection() {
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.9, ease: EASE_EDITORIAL, delay: 0.45 }}
             >
-              Immerse yourself in a world of rich flavors, tailored wine pairings,
-              and impeccable service. Welcome to the sanctuary of{" "}
+              From the first morning coffee to a conversation that stretches into the evening, Lebanese generosity sets the rhythm. We feed the appetite for good food, good company and the feeling of belonging. Welcome to{" "}
               <span className="whitespace-nowrap">Gibran &amp; Co.</span>
             </motion.p>
 
@@ -154,11 +153,11 @@ export function MoodSection() {
               whileHover={reduced ? undefined : { scale: 1.02 }}
               className="glass-dark w-full max-w-md rounded-2xl p-6 sm:p-8"
             >
-              <p className="font-script text-3xl text-warmGold sm:text-5xl">
-                Good Food, Happy People
+              <p className="font-serif italic text-2xl text-warmGold sm:text-3xl leading-snug">
+                “For the other half of your hunger.”
               </p>
-              <p className="mt-2 text-[11px] sm:text-xs uppercase tracking-widest text-[#9FA89D]">
-                Unforgettable Evenings • Curated Wines
+              <p className="mt-3 text-xs sm:text-sm font-light tracking-wide text-[#FAF8F5]/90">
+                Gibran is the inspiration. You are the “&amp; Co.”
               </p>
             </motion.div>
           </motion.div>

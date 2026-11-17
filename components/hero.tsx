@@ -99,7 +99,7 @@ export function Hero() {
                 animate={reduced ? undefined : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: EASE_EDITORIAL, delay: 0.15 }}
               >
-                Good Food • Good Vibes • Great Company
+                Warm Bread • Strong Coffee • Lebanese Deli
               </motion.span>
 
               <h1 className="font-serif text-4xl sm:text-6xl lg:text-[72px] font-normal leading-[1.08] sm:leading-[1.05] tracking-tight text-oliveDark">
@@ -114,15 +114,19 @@ export function Hero() {
                 />
               </h1>
 
-              <motion.p
-                className="max-w-md text-sm font-light leading-relaxed tracking-wide text-oliveMuted/90 sm:text-base"
+              <motion.div
+                className="space-y-3"
                 initial={reduced ? undefined : { opacity: 0, y: 20 }}
                 animate={reduced ? undefined : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.9, ease: EASE_EDITORIAL, delay: 0.75 }}
               >
-                Gibran &amp; Co. is a place where beautiful food, thoughtful design
-                and warm hospitality come together to create unforgettable moments.
-              </motion.p>
+                <p className="font-serif italic text-lg sm:text-xl text-warmGold font-normal">
+                  For the other half of your hunger.
+                </p>
+                <p className="max-w-lg text-sm font-light leading-relaxed tracking-wide text-oliveMuted/90 sm:text-base">
+                  Gibran &amp; Co. is a modern Lebanese deli built around the pleasure of feeding people well. An open kitchen, a generous table, and the instinct to pull up another chair.
+                </p>
+              </motion.div>
 
               <motion.div
                 className="pt-2"

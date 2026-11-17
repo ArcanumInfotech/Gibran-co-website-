@@ -50,19 +50,23 @@ export function Footer() {
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          Classic Cuisine • Modern Touch
+          For the other half of your hunger.
         </motion.p>
 
-        <motion.p
-          className="mt-6 max-w-md text-xs leading-relaxed text-[#9AA596]"
+        <motion.div
+          className="mt-6 max-w-lg space-y-2 text-xs leading-relaxed text-[#9AA596]"
           initial={reduced ? undefined : { opacity: 0, y: 16 }}
           whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.3, ease: EASE_EDITORIAL }}
         >
-          We bring people together over extraordinary food, crafted with care and
-          served with timeless warmth.
-        </motion.p>
+          <p>
+            We feed the appetite for good food, good company and the feeling of belonging.
+          </p>
+          <p className="font-serif italic text-warmGold/90 text-sm">
+            Gibran is the inspiration. You are the “&amp; Co.”
+          </p>
+        </motion.div>
 
         <nav className="mt-8 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-[11px] sm:text-xs uppercase tracking-widest text-[#BCC6B8]">
           {navLinks.map((link, i) => (

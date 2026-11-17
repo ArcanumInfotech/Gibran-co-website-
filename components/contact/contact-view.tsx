@@ -487,18 +487,6 @@ export function ContactView() {
                   </Link>
                 </div>
               </div>
-
-              {/* Guest Guidance notes */}
-              <div className="rounded-2xl border border-[#ECE7DC] bg-white p-5 text-xs leading-relaxed text-oliveMuted space-y-2">
-                <p>
-                  <strong className="font-semibold text-oliveDark">Dress Code:</strong> Smart Casual &amp;
-                  Evening Poise. We kindly request guests to avoid athletic wear in the main dining salons.
-                </p>
-                <p>
-                  <strong className="font-semibold text-oliveDark">Valet Parking:</strong> Complimentary
-                  valet parking is offered at the entrance of our Adliya and Al Maryah Island houses.
-                </p>
-              </div>
             </motion.div>
           </div>
         </div>

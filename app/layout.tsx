@@ -8,33 +8,36 @@ import { FloatingWhatsApp } from "@/components/floating-whatsapp";
 export const metadata: Metadata = {
   metadataBase: new URL("https://gibranandco.example.com"),
   title: {
-    default: "GIBRAN & CO. — Fine Dining & Exceptional Culinary Journey",
+    default: "GIBRAN & CO. — Modern Lebanese Deli & Culinary Journey",
     template: "%s · GIBRAN & CO.",
   },
   description:
-    "Gibran & Co. is a place where beautiful food, thoughtful design and warm hospitality come together to create unforgettable moments.",
+    "Gibran & Co. is a modern Lebanese deli built around the pleasure of feeding people well. For the other half of your hunger.",
   keywords: [
+    "Lebanese deli",
     "Lebanese restaurant",
     "fine dining",
     "Levantine cuisine",
     "Beirut",
     "Abu Dhabi",
     "Bahrain",
+    "warm bread",
+    "strong coffee",
     "mezza",
   ],
   authors: [{ name: "Gibran & Co." }],
   openGraph: {
     type: "website",
-    title: "GIBRAN & CO. — Fine Dining & Exceptional Culinary Journey",
+    title: "GIBRAN & CO. — For the other half of your hunger.",
     description:
-      "Beautiful food, thoughtful design and warm hospitality — a place for unforgettable moments.",
+      "A modern Lebanese deli built around the pleasure of feeding people well. An open kitchen, a generous table, and the instinct to pull up another chair.",
     images: ["/images/hero.png"],
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "GIBRAN & CO.",
-    description: "Fine dining & exceptional culinary journey.",
+    title: "GIBRAN & CO. — For the other half of your hunger.",
+    description: "A modern Lebanese deli built around the pleasure of feeding people well.",
     images: ["/images/hero.png"],
   },
   icons: { icon: "/images/logo.png" },
@@ -57,7 +60,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Manrope:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Amiri:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Manrope:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
           rel="stylesheet"
         />
       </head>

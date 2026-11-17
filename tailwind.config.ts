@@ -46,6 +46,7 @@ const config: Config = {
         sans: ["Montserrat", "system-ui", "sans-serif"],
         script: ['"Alex Brush"', "cursive"],
         manrope: ["Manrope", "system-ui", "sans-serif"],
+        arabic: ['"Amiri"', '"Traditional Arabic"', "serif"],
       },
       maxWidth: {
         shell: "80rem",

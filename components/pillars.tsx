@@ -81,19 +81,53 @@ export function Pillars() {
 
           <div className="inline-flex items-center justify-center gap-3">
             <span className="h-px w-8 bg-warmGold" />
-            <span className="eyebrow !text-warmGold">About Gibran &amp; Co.</span>
+            <span className="eyebrow !text-warmGold">GIBRAN &amp; CO.</span>
             <span className="h-px w-8 bg-warmGold" />
           </div>
 
-          <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl font-normal tracking-tight text-oliveDark">
-            A Heritage of Taste, Hospitality &amp; Soul
+          <h2 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-normal tracking-tight text-oliveDark">
+            For the other half of your hunger.
           </h2>
 
-          <p className="mx-auto max-w-2xl text-xs sm:text-base font-light leading-relaxed text-oliveMuted/90 tracking-wide px-2 sm:px-0">
-            Rooted in the rich culinary artistry of the Levant, Gibran &amp; Co. gathers
-            market-fresh ingredients, ancestral recipes, and thoughtful design into an
-            unhurried dining experience across our iconic regional houses.
-          </p>
+          {/* Kahlil Gibran Literary Quote Card */}
+          <div className="relative mx-auto my-6 max-w-2xl rounded-2xl sm:rounded-3xl border border-[#E3DAC9] bg-[#FAF5EC] p-6 sm:p-8 shadow-xs">
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#FAF7F0] px-4 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.25em] text-warmGold">
+              The Philosophy
+            </span>
+            <p
+              dir="rtl"
+              className="font-arabic text-xl sm:text-2xl lg:text-[26px] font-normal leading-relaxed text-oliveDark tracking-wide"
+            >
+              «فإن خبزتم بغير مبالاة، خبزتم خبزًا مرًّا لا يُشبع إلا نصف جوع الإنسان.»
+            </p>
+            <p className="mt-3 font-serif italic text-base sm:text-lg lg:text-xl text-oliveDark/90 leading-relaxed">
+              “For if you bake bread with indifference, you bake a bitter bread that feeds but half man’s hunger.”
+            </p>
+            <p className="mt-3 text-xs sm:text-sm uppercase tracking-[0.22em] text-warmGold font-medium">
+              — جبران خليل جبران | Kahlil Gibran
+            </p>
+          </div>
+
+          {/* Brand Story Prose */}
+          <div className="mx-auto max-w-2xl space-y-3.5 text-center text-xs sm:text-base font-light leading-relaxed text-oliveMuted/90 tracking-wide px-2 sm:px-0">
+            <p className="font-serif text-base sm:text-xl font-normal text-oliveDark">
+              Warm bread. Strong coffee. Something in the middle for everyone.
+            </p>
+            <p>
+              Gibran &amp; Co. is a modern Lebanese deli built around the pleasure of feeding people well. An open kitchen, a generous table, and the instinct to pull up another chair.
+            </p>
+            <p>
+              From the first morning coffee to a conversation that stretches into the evening, Lebanese generosity sets the rhythm. Plates are passed. Stories unfold. One more bite becomes one more hour.
+            </p>
+            <p>
+              We feed the appetite for good food, good company and the feeling of belonging.
+            </p>
+            <div className="pt-2">
+              <span className="inline-block rounded-full border border-warmGold/40 bg-warmGold/10 px-5 py-2 text-xs sm:text-sm font-serif italic text-oliveDark font-medium tracking-wide">
+                Gibran is the inspiration. You are the “&amp; Co.”
+              </span>
+            </div>
+          </div>
         </motion.div>
 
         {/* 4 Brand Pillars Grid */}

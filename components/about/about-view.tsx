@@ -74,18 +74,17 @@ export function AboutView() {
             <div className="inline-flex items-center gap-3">
               <span className="h-px w-10 bg-warmGold" />
               <span className="text-xs uppercase tracking-[0.25em] text-warmGold font-medium">
-                Our Story &amp; Heritage
+                GIBRAN &amp; CO.
               </span>
             </div>
 
             <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-normal leading-[1.1] tracking-tight text-[#FAF7F0]">
-              A Sanctuary of <br />
-              <span className="italic font-light text-warmGold">Levantine Soul</span> &amp; Artistry
+              For the other half of <br />
+              <span className="italic font-light text-warmGold">your hunger.</span>
             </h1>
 
             <p className="text-sm sm:text-base lg:text-lg font-light leading-relaxed text-[#FAF7F0]/85 tracking-wide max-w-xl">
-              Rooted in ancestral Mediterranean traditions, Gibran &amp; Co. is a poetic tribute to
-              market-fresh harvests, age-old recipes, and the timeless warmth of Levantine hospitality.
+              Gibran &amp; Co. is a modern Lebanese deli built around the pleasure of feeding people well. An open kitchen, a generous table, and the instinct to pull up another chair.
             </p>
 
             <div className="pt-2 flex flex-wrap items-center gap-4">
@@ -122,42 +121,46 @@ export function AboutView() {
           >
             <div className="inline-flex items-center gap-3">
               <span className="h-px w-8 bg-warmGold" />
-              <span className="eyebrow !text-warmGold">The Olive Grove Philosophy</span>
+              <span className="eyebrow !text-warmGold">The Inspiration</span>
             </div>
 
-            <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl font-normal tracking-tight text-oliveDark">
-              Honoring the Ancient Olive Trees of the Mediterranean
+            {/* Kahlil Gibran Literary Quote Card */}
+            <div className="rounded-2xl sm:rounded-3xl border border-[#E3DAC9] bg-[#FAF5EC] p-6 sm:p-7 shadow-xs space-y-3">
+              <p
+                dir="rtl"
+                className="font-arabic text-xl sm:text-2xl font-normal leading-relaxed text-oliveDark tracking-wide"
+              >
+                «فإن خبزتم بغير مبالاة، خبزتم خبزًا مرًّا لا يُشبع إلا نصف جوع الإنسان.»
+              </p>
+              <p className="font-serif italic text-base sm:text-lg text-oliveDark/90 leading-relaxed">
+                “For if you bake bread with indifference, you bake a bitter bread that feeds but half man’s hunger.”
+              </p>
+              <p className="text-xs uppercase tracking-[0.22em] text-warmGold font-medium">
+                — جبران خليل جبران | Kahlil Gibran
+              </p>
+            </div>
+
+            <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-normal tracking-tight text-oliveDark">
+              Warm bread. Strong coffee. <br className="hidden sm:inline" />
+              <span className="italic text-oliveDark/80">Something in the middle for everyone.</span>
             </h2>
 
-            <p className="text-sm sm:text-base font-light leading-relaxed text-oliveMuted/95 tracking-wide">
-              For generations, the olive branch has symbolized peace, friendship, and enduring abundance.
-              At Gibran &amp; Co., every dish begins with the fruit of ancient groves — cold-pressed extra
-              virgin oils, hand-harvested wild za&apos;atar, and aromatic herbs cultivated under the sunlit
-              terroir of the Levant.
-            </p>
+            <div className="space-y-3 text-sm sm:text-base font-light leading-relaxed text-oliveMuted/95 tracking-wide">
+              <p>
+                Gibran &amp; Co. is a modern Lebanese deli built around the pleasure of feeding people well. An open kitchen, a generous table, and the instinct to pull up another chair.
+              </p>
+              <p>
+                From the first morning coffee to a conversation that stretches into the evening, Lebanese generosity sets the rhythm. Plates are passed. Stories unfold. One more bite becomes one more hour.
+              </p>
+              <p>
+                We feed the appetite for good food, good company and the feeling of belonging.
+              </p>
+            </div>
 
-            <p className="text-sm sm:text-base font-light leading-relaxed text-oliveMuted/95 tracking-wide">
-              From our slow-fermented hearth breads to our sand-brewed cardamom coffees, our tables are
-              curated to bring friends and families together in unhurried celebration.
-            </p>
-
-            <div className="grid grid-cols-2 gap-6 pt-4 border-t border-[#ECE7DC]">
-              <div>
-                <p className="font-sans text-3xl sm:text-4xl font-semibold tracking-tight text-oliveDark">
-                  100%
-                </p>
-                <p className="mt-1 text-xs uppercase tracking-wider text-oliveMuted">
-                  Cold-Pressed Virgin Olive Oils
-                </p>
-              </div>
-              <div>
-                <p className="font-sans text-3xl sm:text-4xl font-semibold tracking-tight text-oliveDark">
-                  3
-                </p>
-                <p className="mt-1 text-xs uppercase tracking-wider text-oliveMuted">
-                  Iconic Regional Houses
-                </p>
-              </div>
+            <div className="pt-2">
+              <span className="inline-block rounded-full border border-warmGold/40 bg-warmGold/10 px-6 py-2.5 text-xs sm:text-sm font-serif italic text-oliveDark font-medium tracking-wide">
+                Gibran is the inspiration. You are the “&amp; Co.”
+              </span>
             </div>
           </motion.div>
 
@@ -179,9 +182,9 @@ export function AboutView() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 text-white">
-                <span className="eyebrow !text-warmGold mb-1 block">Artisanal Craft</span>
+                <span className="eyebrow !text-warmGold mb-1 block">Modern Lebanese Deli</span>
                 <p className="font-serif text-xl sm:text-2xl font-normal">
-                  Wood-Fired &amp; Handcrafted Daily
+                  Warm Bread &amp; Strong Coffee
                 </p>
               </div>
             </div>
