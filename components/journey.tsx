@@ -51,9 +51,10 @@ export function Journey() {
         >
           <JourneyPlate className="z-0" />
 
-          <div className="absolute inset-0 z-10 w-full bg-gradient-to-r from-[#181D17] via-[#181D17]/85 to-transparent lg:w-1/2" />
-          {/* Mobile dark veil so text is 100% legible against video on mobile phones */}
-          <div className="absolute inset-0 z-10 bg-[#181D17]/75 sm:hidden" />
+          {/* Desktop scrim: smoothly melts the video's left edge into the text column */}
+          <div className="absolute inset-0 z-10 hidden w-full bg-gradient-to-r from-[#181D17] via-[#181D17]/85 to-transparent lg:block lg:w-1/2" />
+          {/* Mobile scrim: soft top/bottom gradient so video remains vivid while keeping copy & controls legible */}
+          <div className="absolute inset-0 z-10 bg-gradient-to-b from-[#181D17]/80 via-[#181D17]/35 to-[#181D17]/80 lg:hidden" />
           {/* `inset-x-0 bottom-0`, not `inset-0 … bottom-0`: with top, height
               and bottom all set, `bottom` is ignored and the fade would sit at
               the top of the plate. */}
@@ -176,13 +177,13 @@ function SlideCopy({ slide }: { slide: (typeof journeySlides)[number] }) {
   return (
     <>
       <MaskLine>
-        <span className="inline-flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-warmGold">
+        <span className="inline-flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-warmGold drop-shadow-sm">
           <span className="inline-block h-px w-8 bg-warmGold" />
           {slide.eyebrow}
         </span>
       </MaskLine>
 
-      <h2 className="font-serif text-3xl sm:text-5xl lg:text-[62px] font-normal leading-[1.18] sm:leading-[1.14] tracking-tight text-[#FAF8F5]">
+      <h2 className="font-serif text-3xl sm:text-5xl lg:text-[62px] font-normal leading-[1.18] sm:leading-[1.14] tracking-tight text-[#FAF8F5] drop-shadow-sm">
         <MaskLine>
           <span className="block">{slide.line1}</span>
         </MaskLine>
@@ -192,7 +193,7 @@ function SlideCopy({ slide }: { slide: (typeof journeySlides)[number] }) {
       </h2>
 
       <motion.p
-        className="max-w-lg text-sm font-light leading-relaxed tracking-wide text-[#BCC6B8] sm:text-base"
+        className="max-w-lg text-sm font-light leading-relaxed tracking-wide text-[#BCC6B8] sm:text-base drop-shadow-sm"
         variants={{
           hidden: { opacity: 0, y: 16 },
           show: {

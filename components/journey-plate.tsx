@@ -34,36 +34,53 @@ export function JourneyPlate({ className = "" }: { className?: string }) {
     const video = ref.current;
     if (!video) return;
 
+    // Explicit DOM property assignment required for iOS Safari / Android Chrome autoplay
+    video.muted = true;
+    video.defaultMuted = true;
+
     if (reduced) {
       video.pause();
       return;
     }
 
     let cancelled = false;
-    const attempt = video.play();
+    const playVideo = () => {
+      const attempt = video.play();
+      if (attempt) {
+        attempt
+          .then(() => {
+            if (!cancelled) setPlaying(true);
+          })
+          .catch(() => {
+            // Autoplay deferred by browser battery saver policy
+          });
+      } else {
+        setPlaying(true);
+      }
+    };
 
-    if (attempt) {
-      attempt
-        .then(() => {
-          if (!cancelled) setPlaying(true);
-        })
-        .catch(() => {
-          // Autoplay refused (low-power mode, data saver). The poster and the
-          // gradient ground stay put, so this degrades quietly.
-        });
-    } else {
-      setPlaying(true);
-    }
+    playVideo();
+
+    // On mobile devices, ensure video plays immediately on user scroll or touch
+    const handleInteraction = () => {
+      if (video.paused) {
+        playVideo();
+      }
+    };
+
+    window.addEventListener("touchstart", handleInteraction, { passive: true, once: true });
+    window.addEventListener("scroll", handleInteraction, { passive: true, once: true });
 
     return () => {
       cancelled = true;
+      window.removeEventListener("touchstart", handleInteraction);
+      window.removeEventListener("scroll", handleInteraction);
     };
   }, [reduced]);
 
   return (
     <div className={`relative h-full w-full overflow-hidden ${className}`}>
-      {/* Gradient ground. Sits behind everything and remains the visible
-          state whenever the video cannot play. */}
+      {/* Gradient ground behind poster */}
       <div
         aria-hidden="true"
         className="absolute inset-0"
@@ -81,9 +98,7 @@ export function JourneyPlate({ className = "" }: { className?: string }) {
         preload="auto"
         aria-hidden="true"
         tabIndex={-1}
-        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
-          playing ? "opacity-100" : "opacity-0"
-        }`}
+        className="absolute inset-0 h-full w-full object-cover object-[70%_center] sm:object-[68%_center] lg:object-center transition-opacity duration-700 opacity-100"
       />
     </div>
   );
