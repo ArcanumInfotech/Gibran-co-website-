@@ -15,6 +15,7 @@ import { TableSelectionBar } from "@/components/menu/table-selection-bar";
 import {
   DEFAULT_MENU_GROUPS,
   DEFAULT_MENU_SUBGROUPS,
+  DEFAULT_MENU_ITEMS,
   FULL_MENU_CATEGORIES,
   type DietaryTag,
   type MenuItem,
@@ -32,7 +33,8 @@ const DIETARY_FILTERS: DietaryTag[] = [
   "All",
   "Vegetarian",
   "Non-Vegetarian",
-  "Gluten-Free",
+  "Halal",
+  "Spicy",
   "Chef's Selection",
 ];
 
@@ -47,7 +49,7 @@ export function FullMenuView({
   const [menuState, setMenuState] = useState<MenuDataState>({
     groups: DEFAULT_MENU_GROUPS,
     subgroups: DEFAULT_MENU_SUBGROUPS,
-    items: [],
+    items: DEFAULT_MENU_ITEMS,
     categories: FULL_MENU_CATEGORIES,
   });
 
@@ -93,14 +95,18 @@ export function FullMenuView({
 
   const activeGroup = useMemo<MenuGroup>(() => {
     return (
-      menuState.groups.find((g) => g.id === activeGroupId) ||
+      menuState.groups.find(
+        (g) => g.id === activeGroupId || g.name.toLowerCase() === activeGroupId.toLowerCase()
+      ) ||
       menuState.groups[0] ||
       DEFAULT_MENU_GROUPS[0]
     );
   }, [menuState.groups, activeGroupId]);
 
   const activeSubgroups = useMemo<MenuSubgroup[]>(() => {
-    return menuState.subgroups.filter((s) => s.groupId === activeGroup?.id);
+    return menuState.subgroups
+      .filter((s) => s.groupId === activeGroup?.id || s.groupId === String(activeGroup?.id))
+      .sort((a, b) => (a.order || 0) - (b.order || 0));
   }, [menuState.subgroups, activeGroup]);
 
   const activeSubgroup = useMemo<MenuSubgroup | null>(() => {
@@ -109,8 +115,15 @@ export function FullMenuView({
   }, [menuState.subgroups, activeSubgroupId]);
 
   const filteredItems = useMemo(() => {
-    return menuState.items.filter((item) => {
-      if (item.groupId && item.groupId !== activeGroup?.id) return false;
+    const filtered = menuState.items.filter((item) => {
+      if (
+        item.groupId &&
+        activeGroup &&
+        item.groupId !== activeGroup.id &&
+        item.groupName?.toLowerCase() !== activeGroup.name.toLowerCase()
+      ) {
+        return false;
+      }
       if (activeSubgroupId !== "all" && item.subgroupId && item.subgroupId !== activeSubgroupId) {
         return false;
       }
@@ -119,15 +132,29 @@ export function FullMenuView({
       }
       return true;
     });
+
+    return filtered.sort((a, b) => {
+      const orderA = a.dmOrder !== null && a.dmOrder !== undefined ? a.dmOrder : parseInt(a.id, 10) || 999;
+      const orderB = b.dmOrder !== null && b.dmOrder !== undefined ? b.dmOrder : parseInt(b.id, 10) || 999;
+      return orderA - orderB;
+    });
   }, [menuState.items, activeGroup, activeSubgroupId, activeDietary]);
 
   const bannerImage = useMemo(() => {
-    if (activeSubgroupId === "starters") return "/assets/gallery/hummus-tahini-mezza.jpg";
-    if (activeSubgroupId === "mains") return "/assets/gallery/charred-lamb-chops.jpg";
-    if (activeSubgroupId === "desserts") return "/assets/gallery/baklava-ashta.jpg";
-    if (activeGroup?.id === "beverages") return "/assets/gallery/principal-dining-hall.jpg";
-    return "/images/dish-risotto.jpg";
-  }, [activeSubgroupId, activeGroup]);
+    const subLower = (activeSubgroup?.name || activeSubgroupId || "").toLowerCase();
+    const grpLower = (activeGroup?.name || activeGroup?.id || "").toLowerCase();
+
+    if (subLower.includes("burger") || subLower.includes("chicken") || grpLower.includes("food")) {
+      return "/images/dish-chicken.jpg";
+    }
+    if (subLower.includes("dessert") || subLower.includes("chocolate") || grpLower.includes("dessert")) {
+      return "/assets/gallery/baklava-ashta.jpg";
+    }
+    if (subLower.includes("drink") || subLower.includes("coffee") || grpLower.includes("beverage")) {
+      return "/assets/gallery/principal-dining-hall.jpg";
+    }
+    return "/images/dish-chicken.jpg";
+  }, [activeSubgroupId, activeSubgroup, activeGroup]);
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -584,17 +611,43 @@ export function FullMenuView({
                     </div>
 
                     <div className="flex-1 min-h-[64px]">
-                      <h3 className="font-serif text-base font-normal leading-snug text-[#1C241B] transition-colors group-hover:text-[#6d7835]">
-                        {dish.name}
-                      </h3>
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-serif text-base font-normal leading-snug text-[#1C241B] transition-colors group-hover:text-[#6d7835]">
+                          {dish.name}
+                        </h3>
+                        {dish.nameLocal && (
+                          <span className="font-serif text-xs text-[#7A8374] shrink-0 font-medium" dir="rtl">
+                            {dish.nameLocal}
+                          </span>
+                        )}
+                      </div>
                       <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[#6E7569]">
                         {dish.description}
                       </p>
                     </div>
 
+                    {/* Dietary Badges */}
+                    <div className="mt-2 flex flex-wrap items-center gap-1">
+                      {dish.rawDietary?.isSpicy && (
+                        <span className="rounded-full bg-red-50 border border-red-200 px-2 py-0.5 text-[9px] font-semibold text-red-700 flex items-center gap-0.5">
+                          <span>🌶️</span> Spicy
+                        </span>
+                      )}
+                      {dish.rawDietary?.isVeg && (
+                        <span className="rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[9px] font-semibold text-emerald-700 flex items-center gap-0.5">
+                          <span>🌱</span> Veg
+                        </span>
+                      )}
+                      {dish.rawDietary?.isHalal && (
+                        <span className="rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 text-[9px] font-semibold text-amber-800">
+                          Halal
+                        </span>
+                      )}
+                    </div>
+
                     <div className="mt-3 flex items-center justify-between border-t border-[#F2ECE0] pt-3">
                       <span className="font-sans text-base font-bold tabular-nums text-[#1C241B]">
-                        AED {dish.price}
+                        {dish.currency || menuState.brand?.currency || "AED"} {Number(dish.price).toFixed(2)}
                       </span>
 
                       {(() => {

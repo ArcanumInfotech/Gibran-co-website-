@@ -25,63 +25,91 @@ export function TasteTheDifference() {
     return () => unsubscribe();
   }, []);
 
-  // Compute categories dynamically from admin / Firestore dishes
+  // Compute categories dynamically from live API dishes
   const dynamicCategories = useMemo(() => {
     if (!menuState || !menuState.items || menuState.items.length === 0) {
-      return menuCategories
-        .filter((cat) => cat.id !== "signatures")
-        .map((cat) => ({
-          id: cat.id,
-          label: cat.label,
-          intro: cat.intro,
-          items: cat.items.map((it) => ({
-            name: it.name,
-            note: it.note,
-            price: it.price.startsWith("AED") ? it.price : `AED ${it.price}`,
-          })),
-        }));
+      return menuCategories.map((cat) => ({
+        id: cat.id,
+        label: cat.label,
+        intro: cat.intro,
+        items: cat.items.map((it) => ({
+          name: it.name,
+          note: it.note,
+          price: it.price,
+        })),
+      }));
     }
+
+    const currency = menuState.brand?.currency || "AED";
 
     const cats: {
       id: string;
       label: string;
       intro: string;
-      items: { name: string; note: string; price: string; id?: string }[];
+      order: number;
+      items: { name: string; note: string; price: string; id?: string; dmOrder?: number }[];
     }[] = [];
 
-    // Subgroups from Firebase with active dishes
-    menuState.subgroups.forEach((sub) => {
-      const subItems = menuState.items.filter((it) => {
-        if (it.subgroupId) return it.subgroupId === sub.id;
-        const firstSub = menuState.subgroups.find((s) => s.groupId === it.groupId);
-        return firstSub?.id === sub.id;
-      });
+    // Sort subgroups by order
+    const sortedSubgroups = [...menuState.subgroups].sort(
+      (a, b) => (a.order || 0) - (b.order || 0)
+    );
+
+    sortedSubgroups.forEach((sub) => {
+      const subItems = menuState.items
+        .filter((it) => {
+          if (it.subgroupId) return it.subgroupId === sub.id;
+          const firstSub = menuState.subgroups.find((s) => s.groupId === it.groupId);
+          return firstSub?.id === sub.id;
+        })
+        .sort((a, b) => {
+          const orderA = a.dmOrder !== null && a.dmOrder !== undefined ? a.dmOrder : parseInt(a.id, 10) || 999;
+          const orderB = b.dmOrder !== null && b.dmOrder !== undefined ? b.dmOrder : parseInt(b.id, 10) || 999;
+          return orderA - orderB;
+        });
+
       if (subItems.length > 0) {
+        const parentGroup = menuState.groups.find((g) => g.id === sub.groupId);
+        const groupOrder = parentGroup ? parentGroup.order * 10 : 0;
         cats.push({
           id: sub.id,
           label: sub.name,
+          order: groupOrder + (sub.order || 0),
           intro: sub.description || `Curated selections from our ${sub.name.toLowerCase()}.`,
-          items: subItems.map((it) => ({
-            id: it.id,
-            name: it.name,
-            note: it.description || (it.dietary && it.dietary.join(" • ")) || "",
-            price: `AED ${it.price}`,
-          })),
+          items: subItems.map((it) => {
+            const badges: string[] = [];
+            if (it.rawDietary?.isSpicy) badges.push("Spicy");
+            if (it.rawDietary?.isVeg) badges.push("Vegetarian");
+            if (it.rawDietary?.isHalal) badges.push("Halal");
+            const note = it.description || badges.join(" • ") || "";
+
+            return {
+              id: it.id,
+              name: it.name,
+              note,
+              price: `${currency} ${Number(it.price).toFixed(2)}`,
+              dmOrder: it.dmOrder ?? undefined,
+            };
+          }),
         });
       }
     });
 
-    // 3. Fallback tab if dishes were added without assigned subgroups
+    // Sort categories by order
+    cats.sort((a, b) => a.order - b.order);
+
+    // Fallback if no subgroups
     if (cats.length === 0 && menuState.items.length > 0) {
       cats.push({
         id: "all",
         label: "Curated Menu",
+        order: 1,
         intro: "Fresh, seasonal creations from our kitchen.",
         items: menuState.items.map((it) => ({
           id: it.id,
           name: it.name,
           note: it.description || it.groupName || "",
-          price: `AED ${it.price}`,
+          price: `${currency} ${Number(it.price).toFixed(2)}`,
         })),
       });
     }

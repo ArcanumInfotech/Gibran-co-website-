@@ -19,10 +19,13 @@ export function Hero() {
     offset: ["start start", "end start"],
   });
 
-  // Ensure video autoplays smoothly across browsers
+  // Ensure video autoplays smoothly across browsers and mobile devices
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
+    video.muted = true;
+    video.defaultMuted = true;
 
     if (reduced) {
       video.pause();
@@ -32,9 +35,23 @@ export function Hero() {
     const attempt = video.play();
     if (attempt) {
       attempt.catch(() => {
-        // Autoplay policy fallback: silent degradation
+        // Autoplay policy fallback
       });
     }
+
+    const handleInteraction = () => {
+      if (video.paused) {
+        video.play().catch(() => {});
+      }
+    };
+
+    window.addEventListener("touchstart", handleInteraction, { passive: true, once: true });
+    window.addEventListener("scroll", handleInteraction, { passive: true, once: true });
+
+    return () => {
+      window.removeEventListener("touchstart", handleInteraction);
+      window.removeEventListener("scroll", handleInteraction);
+    };
   }, [reduced]);
 
   // Background drifts slower than the page → depth.
@@ -76,7 +93,7 @@ export function Hero() {
             }}
           />
           {/* Subtle mobile overlay to ensure crisp contrast on small screens */}
-          <div className="absolute inset-0 bg-[#FAF7F0]/65 sm:hidden" />
+          <div className="absolute inset-0 bg-[#FAF7F0]/25 sm:hidden" />
           <div
             className="absolute inset-x-0 bottom-0 h-20"
             style={{

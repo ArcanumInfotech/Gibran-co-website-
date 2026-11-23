@@ -444,6 +444,52 @@ export function AdminDashboard({
 
       {/* 2. MAIN DASHBOARD CONTENT */}
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 space-y-6 sm:space-y-8">
+        {/* RMS LIVE INTEGRATION BANNER */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl border border-emerald-200/80 bg-emerald-50/60 p-4 sm:p-5">
+          <div className="flex items-start gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-800 text-lg">
+              🔗
+            </span>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-sans text-xs font-bold uppercase tracking-wider text-emerald-900">
+                  RMS Live Menu Integration Active
+                </span>
+                <span className="inline-flex items-center rounded-full bg-emerald-200/80 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
+                  Auto-Sync
+                </span>
+              </div>
+              <p className="mt-1 text-xs text-emerald-700 leading-relaxed">
+                Dishes and categories are managed directly in your Restaurant Management System (RMS). Any changes in RMS automatically flow into the website and table orders without manual re-entry.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={async () => {
+              setIsLoading(true);
+              try {
+                const res = await fetch("/api/menu");
+                const json = await res.json();
+                if (json.success && json.data) {
+                  setMenuState(json.data);
+                  showToast(`Refreshed ${json.data.items?.length || 0} live dishes from RMS`);
+                } else {
+                  showToast("RMS returned no new data");
+                }
+              } catch {
+                showToast("Failed to refresh from RMS");
+              } finally {
+                setIsLoading(false);
+              }
+            }}
+            disabled={isLoading}
+            className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-emerald-800 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-emerald-900 active:scale-95 transition-all"
+          >
+            <span>{isLoading ? "Syncing..." : "Sync RMS Menu Now"}</span>
+            <span className="text-xs">↻</span>
+          </button>
+        </div>
         {/* KPI METRIC CARDS */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">
           <div className="rounded-2xl border border-[#ECE5D6] bg-white p-4 sm:p-5 shadow-xs transition-all hover:border-[#D5C9B3] hover:shadow-sm">

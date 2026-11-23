@@ -16,6 +16,7 @@ import { TableSelectionBar } from "@/components/menu/table-selection-bar";
 import {
   DEFAULT_MENU_GROUPS,
   DEFAULT_MENU_SUBGROUPS,
+  DEFAULT_MENU_ITEMS,
   FULL_MENU_CATEGORIES,
   type DietaryTag,
   type MenuItem,
@@ -32,7 +33,8 @@ const DIETARY_FILTERS: DietaryTag[] = [
   "All",
   "Vegetarian",
   "Non-Vegetarian",
-  "Gluten-Free",
+  "Halal",
+  "Spicy",
   "Chef's Selection",
 ];
 
@@ -60,24 +62,42 @@ const cardVariants = {
   },
 };
 
-export function MenuContent() {
+export function MenuContent({
+  initialMenuState,
+}: {
+  initialMenuState?: MenuDataState | null;
+} = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get("category");
   const dishParam = searchParams.get("dish");
 
-  const [menuState, setMenuState] = useState<MenuDataState>({
-    groups: DEFAULT_MENU_GROUPS,
-    subgroups: DEFAULT_MENU_SUBGROUPS,
-    items: [],
-    categories: FULL_MENU_CATEGORIES,
+  const [menuState, setMenuState] = useState<MenuDataState>(() => {
+    if (initialMenuState && initialMenuState.items && initialMenuState.items.length > 0) {
+      return initialMenuState;
+    }
+    return {
+      groups: DEFAULT_MENU_GROUPS,
+      subgroups: DEFAULT_MENU_SUBGROUPS,
+      items: DEFAULT_MENU_ITEMS,
+      categories: FULL_MENU_CATEGORIES,
+    };
   });
 
-  const [activeGroupId, setActiveGroupId] = useState<string>("food");
+  const [activeGroupId, setActiveGroupId] = useState<string>(() => {
+    if (initialMenuState?.groups && initialMenuState.groups.length > 0) {
+      return initialMenuState.groups[0].id;
+    }
+    return "86";
+  });
   const [activeSubgroupId, setActiveSubgroupId] = useState<string>("all");
   const [openGroupIds, setOpenGroupIds] = useState<Record<string, boolean>>({
+    "86": true,
     food: true,
+    "87": true,
     beverages: true,
+    "88": true,
+    desserts: true,
   });
 
   const [activeDietary, setActiveDietary] = useState<DietaryTag>("All");
@@ -98,10 +118,28 @@ export function MenuContent() {
     return () => window.removeEventListener(SELECTION_UPDATED_EVENT, handleUpdate);
   }, []);
 
-  // Real-time synchronization directly with Firebase Firestore
+  // Fetch live RMS menu from /api/menu and keep updated
+  useEffect(() => {
+    fetch("/api/menu")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success && json.data && Array.isArray(json.data.groups) && json.data.groups.length > 0) {
+          setMenuState(json.data);
+          setActiveGroupId((curr) => {
+            const exists = json.data.groups.some(
+              (g: MenuGroup) => g.id === curr || g.name.toLowerCase() === curr.toLowerCase()
+            );
+            return exists ? curr : json.data.groups[0].id;
+          });
+        }
+      })
+      .catch((err) => console.warn("Client menu fetch notice:", err));
+  }, []);
+
+  // Real-time synchronization directly with Firebase / local updates
   useEffect(() => {
     const unsubscribe = subscribeToFirebaseMenu((updated) => {
-      if (updated && Array.isArray(updated.groups)) {
+      if (updated && Array.isArray(updated.groups) && updated.items && updated.items.length > 0) {
         setMenuState(updated);
       }
     });
@@ -169,7 +207,9 @@ export function MenuContent() {
   // Active Group object
   const activeGroup = useMemo<MenuGroup>(() => {
     return (
-      menuState.groups.find((g) => g.id === activeGroupId) ||
+      menuState.groups.find(
+        (g) => g.id === activeGroupId || g.name.toLowerCase() === activeGroupId.toLowerCase()
+      ) ||
       menuState.groups[0] ||
       DEFAULT_MENU_GROUPS[0]
     );
@@ -177,7 +217,9 @@ export function MenuContent() {
 
   // Subgroups belonging to active group
   const activeSubgroups = useMemo<MenuSubgroup[]>(() => {
-    return menuState.subgroups.filter((s) => s.groupId === activeGroup?.id);
+    return menuState.subgroups.filter(
+      (s) => s.groupId === activeGroup?.id || (s.groupId && s.groupId === String(activeGroup?.id))
+    );
   }, [menuState.subgroups, activeGroup]);
 
   // Active Subgroup object (if specific subgroup selected)
@@ -186,11 +228,16 @@ export function MenuContent() {
     return menuState.subgroups.find((s) => s.id === activeSubgroupId) || null;
   }, [menuState.subgroups, activeSubgroupId]);
 
-  // Filtered dishes
+  // Filtered and sorted dishes (ordered by dmOrder per guideline 3)
   const displayedDishes = useMemo(() => {
-    return menuState.items.filter((item) => {
+    const filtered = menuState.items.filter((item) => {
       // Group filter
-      if (item.groupId && item.groupId !== activeGroup?.id) {
+      if (
+        item.groupId &&
+        activeGroup &&
+        item.groupId !== activeGroup.id &&
+        item.groupName?.toLowerCase() !== activeGroup.name.toLowerCase()
+      ) {
         return false;
       }
       // Subgroup filter
@@ -205,16 +252,30 @@ export function MenuContent() {
       }
       return true;
     });
+
+    return filtered.sort((a, b) => {
+      const orderA = a.dmOrder !== null && a.dmOrder !== undefined ? a.dmOrder : parseInt(a.id, 10) || 999;
+      const orderB = b.dmOrder !== null && b.dmOrder !== undefined ? b.dmOrder : parseInt(b.id, 10) || 999;
+      return orderA - orderB;
+    });
   }, [menuState.items, activeGroup, activeSubgroupId, activeDietary]);
 
   // Dynamic banner image based on selection
   const bannerImage = useMemo(() => {
-    if (activeSubgroupId === "starters") return "/assets/gallery/hummus-tahini-mezza.jpg";
-    if (activeSubgroupId === "mains") return "/assets/gallery/charred-lamb-chops.jpg";
-    if (activeSubgroupId === "desserts") return "/assets/gallery/baklava-ashta.jpg";
-    if (activeGroup?.id === "beverages") return "/assets/gallery/principal-dining-hall.jpg";
+    const subLower = (activeSubgroup?.name || activeSubgroupId || "").toLowerCase();
+    const grpLower = (activeGroup?.name || activeGroup?.id || "").toLowerCase();
+
+    if (subLower.includes("burger") || subLower.includes("chicken") || grpLower.includes("food")) {
+      return "/images/dish-chicken.jpg";
+    }
+    if (subLower.includes("dessert") || subLower.includes("chocolate") || grpLower.includes("dessert")) {
+      return "/assets/gallery/baklava-ashta.jpg";
+    }
+    if (subLower.includes("drink") || subLower.includes("coffee") || grpLower.includes("beverage")) {
+      return "/assets/gallery/principal-dining-hall.jpg";
+    }
     return "/images/dish-risotto.jpg";
-  }, [activeSubgroupId, activeGroup]);
+  }, [activeSubgroupId, activeSubgroup, activeGroup]);
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -316,9 +377,8 @@ export function MenuContent() {
                   >
                     <span>{isMobileSidebarExpanded ? "Hide" : "Categories"}</span>
                     <span
-                      className={`text-[9px] text-[#6d7835] transition-transform duration-300 ${
-                        isMobileSidebarExpanded ? "rotate-180" : "rotate-0"
-                      }`}
+                      className={`text-[9px] text-[#6d7835] transition-transform duration-300 ${isMobileSidebarExpanded ? "rotate-180" : "rotate-0"
+                        }`}
                     >
                       ▼
                     </span>
@@ -345,9 +405,8 @@ export function MenuContent() {
 
               {/* GROUP & SUBGROUPS NAVIGATION LIST */}
               <div
-                className={`${
-                  isMobileSidebarExpanded ? "block" : "hidden"
-                } lg:block mt-3 lg:mt-6 pt-3 lg:pt-0 border-t border-[#ECE5D6] lg:border-t-0`}
+                className={`${isMobileSidebarExpanded ? "block" : "hidden"
+                  } lg:block mt-3 lg:mt-6 pt-3 lg:pt-0 border-t border-[#ECE5D6] lg:border-t-0`}
               >
                 {/* Mobile Quick Action Link */}
                 <div className="mb-3 flex items-center justify-between lg:hidden">
@@ -369,128 +428,125 @@ export function MenuContent() {
                 </div>
 
                 <nav className="space-y-3">
-                  {menuState.groups.map((group) => {
-                    const isGroupActive = activeGroupId === group.id;
-                    const isExpanded = !!openGroupIds[group.id];
-                    const subsForThisGroup = menuState.subgroups.filter(
-                      (s) => s.groupId === group.id
-                    );
-                    const totalGroupDishes = menuState.items.filter(
-                      (i) => i.groupId === group.id
-                    ).length;
+                  {[...menuState.groups]
+                    .sort((a, b) => (a.order || 0) - (b.order || 0))
+                    .map((group) => {
+                      const isGroupActive = activeGroupId === group.id;
+                      const isExpanded = !!openGroupIds[group.id];
+                      const subsForThisGroup = menuState.subgroups
+                        .filter((s) => s.groupId === group.id)
+                        .sort((a, b) => (a.order || 0) - (b.order || 0));
+                      const totalGroupDishes = menuState.items.filter(
+                        (i) => i.groupId === group.id
+                      ).length;
 
-                    return (
-                      <div
-                        key={group.id}
-                        className="rounded-2xl border border-[#ECE5D6] bg-white/60 p-1.5 transition-colors"
-                      >
-                        {/* GROUP HEADER & DROPDOWN TOGGLE BUTTON */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setActiveGroupId(group.id);
-                            setActiveSubgroupId("all");
-                            toggleGroupOpen(group.id);
-                          }}
-                          className={`group flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold transition-all ${
-                            isGroupActive
-                              ? "bg-[#1C241B] text-white shadow-sm"
-                              : "text-[#2C3529] hover:bg-white hover:text-[#1C241B]"
-                          }`}
+                      return (
+                        <div
+                          key={group.id}
+                          className="rounded-2xl border border-[#ECE5D6] bg-white/60 p-1.5 transition-colors"
                         >
-                          <span className="flex items-center gap-2">
-                            <span className="text-sm">
-                              {group.id === "food" ? "🍽️" : group.id === "beverages" ? "🍸" : "✨"}
-                            </span>
-                            <span className="tracking-wide uppercase text-[11px] font-bold">
-                              {group.name}
-                            </span>
-                          </span>
-
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`rounded-full px-2 py-0.5 text-[10px] font-mono ${
-                                isGroupActive
-                                  ? "bg-white/20 text-white"
-                                  : "bg-[#FAF7F0] text-[#7A8374]"
+                          {/* GROUP HEADER & DROPDOWN TOGGLE BUTTON */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveGroupId(group.id);
+                              setActiveSubgroupId("all");
+                              toggleGroupOpen(group.id);
+                            }}
+                            className={`group flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold transition-all ${isGroupActive
+                                ? "bg-[#1C241B] text-white shadow-sm"
+                                : "text-[#2C3529] hover:bg-white hover:text-[#1C241B]"
                               }`}
-                            >
-                              {totalGroupDishes}
+                          >
+                            <span className="flex items-center gap-2">
+                              <span className="text-sm">
+                                {group.id === "food" ? "🍽️" : group.id === "beverages" ? "🍸" : "✨"}
+                              </span>
+                              <span className="tracking-wide uppercase text-[11px] font-bold">
+                                {group.name}
+                              </span>
                             </span>
-                            <span
-                              className={`text-[9px] transition-transform duration-200 ${
-                                isExpanded ? "rotate-180" : "rotate-0"
-                              }`}
-                            >
-                              ▼
-                            </span>
-                          </div>
-                        </button>
 
-                        {/* SUBGROUPS DROPDOWN ACCORDION (shown below group) */}
-                        <AnimatePresence initial={false}>
-                          {isExpanded && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: "auto" }}
-                              exit={{ opacity: 0, height: 0 }}
-                              transition={{ duration: 0.22, ease: "easeInOut" }}
-                              className="overflow-hidden pl-2 pr-1 pt-1.5 pb-1 space-y-1"
-                            >
-                              {/* Option 1: View all in this group */}
-                              <button
-                                type="button"
-                                onClick={() => handleSelectSubgroup(group.id, "all")}
-                                className={`group flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[11px] transition-colors ${
-                                  isGroupActive && activeSubgroupId === "all"
-                                    ? "bg-[#6d7835] font-semibold text-white shadow-xs"
-                                    : "text-[#5A6355] hover:bg-white/80 hover:text-[#1C241B]"
-                                }`}
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`rounded-full px-2 py-0.5 text-[10px] font-mono ${isGroupActive
+                                    ? "bg-white/20 text-white"
+                                    : "bg-[#FAF7F0] text-[#7A8374]"
+                                  }`}
                               >
-                                <span className="flex items-center gap-2">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" />
-                                  <span>All {group.name}</span>
-                                </span>
-                                <span className="text-[10px] font-mono opacity-80">
-                                  {totalGroupDishes}
-                                </span>
-                              </button>
+                                {totalGroupDishes}
+                              </span>
+                              <span
+                                className={`text-[9px] transition-transform duration-200 ${isExpanded ? "rotate-180" : "rotate-0"
+                                  }`}
+                              >
+                                ▼
+                              </span>
+                            </div>
+                          </button>
 
-                              {/* Option 2: Each individual subgroup */}
-                              {subsForThisGroup.map((sub) => {
-                                const isSubActive =
-                                  isGroupActive && activeSubgroupId === sub.id;
-                                const subCount = menuState.items.filter(
-                                  (i) => i.subgroupId === sub.id
-                                ).length;
-
-                                return (
-                                  <button
-                                    key={sub.id}
-                                    type="button"
-                                    onClick={() => handleSelectSubgroup(group.id, sub.id)}
-                                    className={`group flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[11px] transition-colors ${
-                                      isSubActive
-                                        ? "bg-[#6d7835] font-semibold text-white shadow-xs"
-                                        : "text-[#5A6355] hover:bg-white/80 hover:text-[#1C241B]"
+                          {/* SUBGROUPS DROPDOWN ACCORDION (shown below group) */}
+                          <AnimatePresence initial={false}>
+                            {isExpanded && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.22, ease: "easeInOut" }}
+                                className="overflow-hidden pl-2 pr-1 pt-1.5 pb-1 space-y-1"
+                              >
+                                {/* Option 1: View all in this group */}
+                                <button
+                                  type="button"
+                                  onClick={() => handleSelectSubgroup(group.id, "all")}
+                                  className={`group flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[11px] transition-colors ${isGroupActive && activeSubgroupId === "all"
+                                      ? "bg-[#6d7835] font-semibold text-white shadow-xs"
+                                      : "text-[#5A6355] hover:bg-white/80 hover:text-[#1C241B]"
                                     }`}
-                                  >
-                                    <span className="flex items-center gap-2 truncate">
-                                      <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" />
-                                      <span className="truncate">{sub.name}</span>
-                                    </span>
-                                    <span className="text-[10px] font-mono opacity-80 shrink-0 ml-1">
-                                      {subCount}
-                                    </span>
-                                  </button>
-                                );
-                              })}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    );
-                  })}
+                                >
+                                  <span className="flex items-center gap-2">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" />
+                                    <span>All {group.name}</span>
+                                  </span>
+                                  <span className="text-[10px] font-mono opacity-80">
+                                    {totalGroupDishes}
+                                  </span>
+                                </button>
+
+                                {/* Option 2: Each individual subgroup */}
+                                {subsForThisGroup.map((sub) => {
+                                  const isSubActive =
+                                    isGroupActive && activeSubgroupId === sub.id;
+                                  const subCount = menuState.items.filter(
+                                    (i) => i.subgroupId === sub.id
+                                  ).length;
+
+                                  return (
+                                    <button
+                                      key={sub.id}
+                                      type="button"
+                                      onClick={() => handleSelectSubgroup(group.id, sub.id)}
+                                      className={`group flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[11px] transition-colors ${isSubActive
+                                          ? "bg-[#6d7835] font-semibold text-white shadow-xs"
+                                          : "text-[#5A6355] hover:bg-white/80 hover:text-[#1C241B]"
+                                        }`}
+                                    >
+                                      <span className="flex items-center gap-2 truncate">
+                                        <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" />
+                                        <span className="truncate">{sub.name}</span>
+                                      </span>
+                                      <span className="text-[10px] font-mono opacity-80 shrink-0 ml-1">
+                                        {subCount}
+                                      </span>
+                                    </button>
+                                  );
+                                })}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      );
+                    })}
                 </nav>
 
                 {/* Bottom Script Signature */}
@@ -713,11 +769,10 @@ export function MenuContent() {
                       key={tag}
                       type="button"
                       onClick={() => setActiveDietary(tag)}
-                      className={`relative rounded-full px-4 py-1.5 text-xs transition-colors duration-200 ${
-                        isActive
+                      className={`relative rounded-full px-4 py-1.5 text-xs transition-colors duration-200 ${isActive
                           ? "font-semibold text-white"
                           : "bg-[#EBE5D8] font-medium text-[#3A4337] hover:bg-[#E2DBCC]"
-                      }`}
+                        }`}
                     >
                       {isActive && (
                         <motion.span
@@ -739,11 +794,10 @@ export function MenuContent() {
                     key={sub.id}
                     type="button"
                     onClick={() => setActiveSubgroupId(sub.id)}
-                    className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${
-                      activeSubgroupId === sub.id
+                    className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${activeSubgroupId === sub.id
                         ? "bg-[#1C241B] text-white"
                         : "bg-white border border-[#D5C9B3] text-[#5A6355] hover:border-[#1C241B]"
-                    }`}
+                      }`}
                   >
                     {sub.name}
                   </button>
@@ -814,19 +868,41 @@ export function MenuContent() {
 
                       {/* Content Area */}
                       <div className="flex-1 min-h-[72px]">
-                        <h3 className="font-serif text-lg font-normal leading-snug text-[#1C241B] transition-colors group-hover:text-[#6d7835]">
-                          {dish.name}
-                        </h3>
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="font-serif text-lg font-normal leading-snug text-[#1C241B] transition-colors group-hover:text-[#6d7835]">
+                            {dish.name}
+                          </h3>
+                          {dish.nameLocal && (
+                            <span className="font-serif text-sm text-[#7A8374] shrink-0 font-medium" dir="rtl">
+                              {dish.nameLocal}
+                            </span>
+                          )}
+                        </div>
                         <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[#6E7569]">
                           {dish.description}
                         </p>
                       </div>
 
-                      {/* Dietary Badges */}
-                      {dish.dietary && dish.dietary.length > 0 && (
-                        <div className="mt-2.5 flex flex-wrap gap-1">
-                          {dish.dietary
-                            .filter((tag) => tag !== "All")
+                      {/* Dietary Badges (Guideline 5: isVeg, isSpicy, Halal) */}
+                      <div className="mt-2.5 flex flex-wrap items-center gap-1">
+                        {dish.rawDietary?.isSpicy && (
+                          <span className="rounded-full bg-red-50 border border-red-200 px-2 py-0.5 text-[9px] font-semibold text-red-700 flex items-center gap-0.5">
+                            <span>🌶️</span> Spicy
+                          </span>
+                        )}
+                        {dish.rawDietary?.isVeg && (
+                          <span className="rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[9px] font-semibold text-emerald-700 flex items-center gap-0.5">
+                            <span>🌱</span> Veg
+                          </span>
+                        )}
+                        {dish.rawDietary?.isHalal && (
+                          <span className="rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 text-[9px] font-semibold text-amber-800">
+                            Halal
+                          </span>
+                        )}
+                        {dish.dietary &&
+                          dish.dietary
+                            .filter((tag) => tag !== "All" && tag !== "Spicy" && tag !== "Vegetarian" && tag !== "Halal")
                             .map((tag) => (
                               <span
                                 key={tag}
@@ -835,13 +911,12 @@ export function MenuContent() {
                                 {tag}
                               </span>
                             ))}
-                        </div>
-                      )}
+                      </div>
 
-                      {/* Price & Add Action */}
+                      {/* Price & Add Action (Guideline 4: brand.currency prefix) */}
                       <div className="mt-3 flex items-center justify-between border-t border-[#F2ECE0] pt-3">
                         <span className="font-sans text-base font-bold tabular-nums text-[#1C241B]">
-                          AED {dish.price}
+                          {dish.currency || menuState.brand?.currency || "AED"} {Number(dish.price).toFixed(2)}
                         </span>
 
                         {(() => {

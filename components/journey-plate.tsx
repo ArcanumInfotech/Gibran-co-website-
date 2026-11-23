@@ -98,7 +98,7 @@ export function JourneyPlate({ className = "" }: { className?: string }) {
         preload="auto"
         aria-hidden="true"
         tabIndex={-1}
-        className="absolute inset-0 h-full w-full object-cover object-[70%_center] sm:object-[68%_center] lg:object-center transition-opacity duration-700 opacity-100"
+        className="absolute inset-0 h-full w-full object-cover object-[60%_center] sm:object-[68%_center] lg:object-center transition-opacity duration-700 opacity-100"
       />
     </div>
   );

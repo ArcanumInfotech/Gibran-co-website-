@@ -54,7 +54,7 @@ export function Journey() {
           {/* Desktop scrim: smoothly melts the video's left edge into the text column */}
           <div className="absolute inset-0 z-10 hidden w-full bg-gradient-to-r from-[#181D17] via-[#181D17]/85 to-transparent lg:block lg:w-1/2" />
           {/* Mobile scrim: soft top/bottom gradient so video remains vivid while keeping copy & controls legible */}
-          <div className="absolute inset-0 z-10 bg-gradient-to-b from-[#181D17]/80 via-[#181D17]/35 to-[#181D17]/80 lg:hidden" />
+          <div className="absolute inset-0 z-10 bg-gradient-to-b from-[#181D17]/65 via-[#181D17]/20 to-[#181D17]/75 lg:hidden" />
           {/* `inset-x-0 bottom-0`, not `inset-0 … bottom-0`: with top, height
               and bottom all set, `bottom` is ignored and the fade would sit at
               the top of the plate. */}
@@ -185,10 +185,10 @@ function SlideCopy({ slide }: { slide: (typeof journeySlides)[number] }) {
 
       <h2 className="font-serif text-3xl sm:text-5xl lg:text-[62px] font-normal leading-[1.18] sm:leading-[1.14] tracking-tight text-[#FAF8F5] drop-shadow-sm">
         <MaskLine>
-          <span className="block">{slide.line1}</span>
+          <span className="block pr-4 sm:pr-8">{slide.line1}</span>
         </MaskLine>
         <MaskLine>
-          <span className="block italic font-light text-warmGold">{slide.line2}</span>
+          <span className="block italic font-light text-warmGold pr-4 sm:pr-8">{slide.line2}</span>
         </MaskLine>
       </h2>
 
@@ -213,7 +213,7 @@ function SlideCopy({ slide }: { slide: (typeof journeySlides)[number] }) {
 function MaskLine({ children }: { children: React.ReactNode }) {
   return (
     <motion.span
-      className="block overflow-hidden px-[0.3em] -mx-[0.3em] pt-[0.1em] -mt-[0.1em] pb-[0.4em] -mb-[0.4em]"
+      className="block overflow-hidden px-[0.6em] -mx-[0.6em] pt-[0.15em] -mt-[0.15em] pb-[0.45em] -mb-[0.45em]"
       variants={{
         hidden: { y: "130%", opacity: 0 },
         show: {

@@ -119,15 +119,49 @@ export function DishModal({
             <div className="flex items-start justify-between gap-4">
               <div>
                 <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#C5A880]">
-                  Gourmet Selection
+                  {dish.subgroupName || dish.categoryName || "Digital Menu"}
                 </span>
                 <h3 className="font-serif text-2xl font-normal text-[#1C241B] sm:text-3xl">
                   {dish.name}
                 </h3>
+                {dish.nameLocal && (
+                  <span className="font-serif text-base text-[#7A8374] block mt-0.5" dir="rtl">
+                    {dish.nameLocal}
+                  </span>
+                )}
               </div>
               <span className="font-sans text-xl sm:text-2xl font-bold tabular-nums tracking-normal text-[#1C241B]">
-                AED {dish.price}
+                {dish.currency || "AED"} {Number(dish.price).toFixed(2)}
               </span>
+            </div>
+
+            {/* Dietary Badges */}
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {dish.rawDietary?.isSpicy && (
+                <span className="rounded-full bg-red-50 border border-red-200 px-2.5 py-1 text-[10px] font-semibold text-red-700 flex items-center gap-1">
+                  <span>🌶️</span> Spicy
+                </span>
+              )}
+              {dish.rawDietary?.isVeg && (
+                <span className="rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-[10px] font-semibold text-emerald-700 flex items-center gap-1">
+                  <span>🌱</span> Vegetarian
+                </span>
+              )}
+              {dish.rawDietary?.isHalal && (
+                <span className="rounded-full bg-amber-50 border border-amber-200 px-2.5 py-1 text-[10px] font-semibold text-amber-800">
+                  Halal
+                </span>
+              )}
+              {dish.dietary
+                ?.filter((tag) => tag !== "All" && tag !== "Spicy" && tag !== "Vegetarian" && tag !== "Halal")
+                .map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full bg-[#FAF7F0] border border-[#ECE5D6] px-2.5 py-1 text-[10px] font-medium text-[#586255]"
+                  >
+                    {tag}
+                  </span>
+                ))}
             </div>
 
             <p className="mt-3 text-sm leading-relaxed text-[#6E7569]">

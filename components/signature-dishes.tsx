@@ -28,24 +28,34 @@ export function SignatureDishes() {
     return () => unsubscribe();
   }, []);
 
-  // Prefer live dishes from admin/Firestore:
+  // Prefer live dishes from API:
   const displayDishes = useMemo(() => {
     if (!menuState || !menuState.items || menuState.items.length === 0) {
       return signatureDishes;
     }
-    // Take signature dishes, or dishes with images, or live dishes from admin
-    const signatures = menuState.items.filter(
-      (it) => it.isSignature || it.badge || (it.dietary && it.dietary.includes("Chef's Selection"))
-    );
-    const chosen = signatures.length >= 4 ? signatures : menuState.items.slice(0, 8);
-    return chosen.map((it) => ({
-      id: it.id,
-      name: it.name,
-      description: it.description || it.subgroupName || "Artisanal Levantine culinary specialty.",
-      price: `AED ${it.price}`,
-      image: it.image || "/images/dish-risotto.jpg",
-      tag: it.badge || (it.dietary && it.dietary.includes("Vegetarian") ? "Vegetarian" : "House Special"),
-    }));
+    const currency = menuState.brand?.currency || "AED";
+    // Sort dishes by dmOrder (or order)
+    const sorted = [...menuState.items].sort((a, b) => {
+      const orderA = a.dmOrder !== null && a.dmOrder !== undefined ? a.dmOrder : parseInt(a.id, 10) || 999;
+      const orderB = b.dmOrder !== null && b.dmOrder !== undefined ? b.dmOrder : parseInt(b.id, 10) || 999;
+      return orderA - orderB;
+    });
+
+    return sorted.map((it) => {
+      let tag = it.badge || "Specialty";
+      if (it.rawDietary?.isSpicy) tag = "Spicy";
+      else if (it.rawDietary?.isVeg) tag = "Vegetarian";
+      else if (it.isSignature) tag = "Signature";
+
+      return {
+        id: it.id,
+        name: it.name,
+        description: it.description || `Freshly prepared ${it.name} made to order.`,
+        price: `${currency} ${Number(it.price).toFixed(2)}`,
+        image: it.image || "/images/dish-chicken.jpg",
+        tag,
+      };
+    });
   }, [menuState]);
 
   /* How many cards fit at the current breakpoint. */
@@ -210,83 +220,83 @@ export function SignatureDishes() {
           className="relative"
         >
 
-        {/* Track */}
-        <div
-          ref={trackRef}
-          role="region"
-          aria-roledescription="carousel"
-          aria-label="Signature dishes"
-          tabIndex={0}
-          onKeyDown={onKeyDown}
-          className="-mx-6 flex snap-x snap-mandatory gap-6 overflow-x-auto overflow-y-hidden px-6 pb-4 outline-none scroll-smooth lg:-mx-12 lg:px-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overscroll-x-contain overscroll-y-none"
-          style={{ touchAction: "pan-x pan-y" }}
-        >
-          {displayDishes.map((dish, i) => (
-            <motion.div
-              key={dish.id + i}
-              role="group"
-              aria-roledescription="slide"
-              aria-label={`${i + 1} of ${displayDishes.length}`}
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true, margin: "-20px" }}
-              transition={{ duration: 0.6, delay: i * 0.05, ease: EASE_EDITORIAL }}
-              className="flex w-[calc(100vw-3rem)] shrink-0 snap-start flex-col sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)]"
-            >
-              <Link
-                href={`/menu?category=signatures&dish=${dish.id}`}
-                className="group flex h-full flex-col justify-between rounded-2xl border border-[#ECE7DC] bg-white p-4 dish-shadow transition-all duration-500 ease-editorial hover:shadow-[0_18px_30px_-8px_rgba(28,36,27,0.14)] hover:border-[#D5CDBC] cursor-pointer"
-                title={`View ${dish.name} in Menu`}
+          {/* Track */}
+          <div
+            ref={trackRef}
+            role="region"
+            aria-roledescription="carousel"
+            aria-label="Signature dishes"
+            tabIndex={0}
+            onKeyDown={onKeyDown}
+            className="-mx-6 flex snap-x snap-mandatory gap-6 overflow-x-auto overflow-y-hidden px-6 pb-4 outline-none scroll-smooth lg:-mx-12 lg:px-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overscroll-x-contain overscroll-y-none"
+            style={{ touchAction: "pan-x pan-y" }}
+          >
+            {displayDishes.map((dish, i) => (
+              <motion.div
+                key={dish.id + i}
+                role="group"
+                aria-roledescription="slide"
+                aria-label={`${i + 1} of ${displayDishes.length}`}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true, margin: "-20px" }}
+                transition={{ duration: 0.6, delay: i * 0.05, ease: EASE_EDITORIAL }}
+                className="flex w-[calc(100vw-3rem)] shrink-0 snap-start flex-col sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)]"
               >
-                <div>
-                  <div className="relative mb-3 sm:mb-4 h-40 xs:h-44 sm:h-52 w-full overflow-hidden rounded-xl bg-sand select-none">
-                    <Image
-                      src={dish.image}
-                      alt={dish.name}
-                      fill
-                      draggable={false}
-                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, calc(100vw - 3rem)"
-                      className="h-full w-full object-cover transition-transform duration-700 ease-editorial group-hover:scale-105 pointer-events-none select-none"
-                    />
-                    <AnimatePresence>
-                      {dish.tag && (
-                        <motion.span
-                          initial={{ opacity: 0, y: -8 }}
-                          variants={{ hover: { opacity: 1, y: 0 } }}
-                          transition={{ duration: 0.4, ease: EASE_EDITORIAL }}
-                          className="absolute left-3 top-3 rounded-full bg-[#FAF8F5]/95 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-oliveDark backdrop-blur-sm"
-                        >
-                          {dish.tag}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </div>
-
+                <Link
+                  href={`/menu?category=signatures&dish=${dish.id}`}
+                  className="group flex h-full flex-col justify-between rounded-2xl border border-[#ECE7DC] bg-white p-4 dish-shadow transition-all duration-500 ease-editorial hover:shadow-[0_18px_30px_-8px_rgba(28,36,27,0.14)] hover:border-[#D5CDBC] cursor-pointer"
+                  title={`View ${dish.name} in Menu`}
+                >
                   <div>
-                    <h3 className="font-serif text-xl font-semibold leading-snug text-oliveDark transition-colors group-hover:text-[#6d7835]">
-                      {dish.name}
-                    </h3>
-                    <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-oliveMuted">
-                      {dish.description}
-                    </p>
-                  </div>
-                </div>
+                    <div className="relative mb-3 sm:mb-4 h-40 xs:h-44 sm:h-52 w-full overflow-hidden rounded-xl bg-sand select-none">
+                      <Image
+                        src={dish.image}
+                        alt={dish.name}
+                        fill
+                        draggable={false}
+                        sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, calc(100vw - 3rem)"
+                        className="h-full w-full object-cover transition-transform duration-700 ease-editorial group-hover:scale-105 pointer-events-none select-none"
+                      />
+                      <AnimatePresence>
+                        {dish.tag && (
+                          <motion.span
+                            initial={{ opacity: 0, y: -8 }}
+                            variants={{ hover: { opacity: 1, y: 0 } }}
+                            transition={{ duration: 0.4, ease: EASE_EDITORIAL }}
+                            className="absolute left-3 top-3 rounded-full bg-[#FAF8F5]/95 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-oliveDark backdrop-blur-sm"
+                          >
+                            {dish.tag}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </div>
 
-                <div className="mt-4 flex items-center justify-between border-t border-[#F0ECE1] pt-3">
-                  <span className="font-sans text-base sm:text-lg font-bold tabular-nums tracking-normal text-oliveDark">
-                    {dish.price.startsWith("AED") ? dish.price : `AED ${dish.price.replace("$", "")}`}
-                  </span>
-                  <span
-                    className="group/order inline-flex items-center gap-1.5 rounded-full bg-[#6d7835] px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-white shadow-sm transition-all duration-300 group-hover:bg-[#5b642c]"
-                  >
-                    Order
-                    <ArrowRightIcon className="h-3 w-3 transition-transform duration-500 ease-editorial group-hover/order:translate-x-1" />
-                  </span>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
+                    <div>
+                      <h3 className="font-serif text-xl font-semibold leading-snug text-oliveDark transition-colors group-hover:text-[#6d7835]">
+                        {dish.name}
+                      </h3>
+                      <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-oliveMuted">
+                        {dish.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between border-t border-[#F0ECE1] pt-3">
+                    <span className="font-sans text-base sm:text-lg font-bold tabular-nums tracking-normal text-oliveDark">
+                      {dish.price.startsWith("AED") ? dish.price : `AED ${dish.price.replace("$", "")}`}
+                    </span>
+                    <span
+                      className="group/order inline-flex items-center gap-1.5 rounded-full bg-[#6d7835] px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-white shadow-sm transition-all duration-300 group-hover:bg-[#5b642c]"
+                    >
+                      Order
+                      <ArrowRightIcon className="h-3 w-3 transition-transform duration-500 ease-editorial group-hover/order:translate-x-1" />
+                    </span>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
         </div>
 
         {/* Progress rail */}

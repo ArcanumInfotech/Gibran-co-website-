@@ -3,6 +3,7 @@ import { db } from "@/lib/firebase";
 import {
   DEFAULT_MENU_GROUPS,
   DEFAULT_MENU_SUBGROUPS,
+  DEFAULT_MENU_ITEMS,
   buildCategoriesFromGroups,
   type MenuGroup,
   type MenuSubgroup,
@@ -15,26 +16,91 @@ export interface MenuDataState {
   subgroups: MenuSubgroup[];
   items: MenuItem[];
   categories: MenuCategoryData[];
+  brand?: {
+    id?: number | string;
+    code?: string;
+    name?: string;
+    currency?: string;
+    logo?: string | null;
+  };
+  outlet?: {
+    id?: number | string | null;
+    code?: string | null;
+    name?: string | null;
+    address?: string | null;
+    phone?: string | null;
+  };
 }
 
 const MENU_DOC_REF = () => doc(db, "restaurant", "menu");
-const LOCAL_STORAGE_KEY = "gibran_menu_full_data_v2";
+const LOCAL_STORAGE_KEY = "rms_menu_live_v5";
+
+const LEGACY_DUMMY_NAMES = new Set([
+  "pizza",
+  "ndfndfn",
+  "hummus bil lahme",
+  "valrhona molten chocolate fondant",
+  "herb-grilled chicken",
+  "truffle infused labneh sphere",
+  "confit de canard flatbread",
+  "aged halva mille-feuille",
+  "crispy calamari & saffron aioli",
+  "za'atar crusted lamb ribs",
+  "smoked eggplant mtbbal",
+  "spiced chickpea & cauliflower dip",
+  "wood-fired spiced halloumi",
+  "charcoal sea bass sayadieh",
+  "braised short rib tagine",
+  "spiced date & pistachio cake",
+  "warm cardamom knafeh",
+  "orange blossom mouhalabieh",
+  "beirut roastery v60",
+]);
 
 const INITIAL_DEFAULT_STATE: MenuDataState = {
   groups: DEFAULT_MENU_GROUPS,
   subgroups: DEFAULT_MENU_SUBGROUPS,
-  items: [],
-  categories: buildCategoriesFromGroups(DEFAULT_MENU_GROUPS, DEFAULT_MENU_SUBGROUPS, []),
+  items: DEFAULT_MENU_ITEMS,
+  categories: buildCategoriesFromGroups(DEFAULT_MENU_GROUPS, DEFAULT_MENU_SUBGROUPS, DEFAULT_MENU_ITEMS),
+  brand: {
+    id: 1,
+    code: "TFC001",
+    name: "Taste Fried Chicken",
+    currency: "AED",
+    logo: null,
+  },
+  outlet: {
+    id: 1,
+    code: "LULU",
+    name: "All Branches / Brand Default",
+    address: null,
+    phone: null,
+  },
 };
 
 function getLocalStoredState(): MenuDataState | null {
   if (typeof window === "undefined") return null;
   try {
+    // Purge legacy caches that held dummy dishes
+    ["tfc_menu_live_v3", "tfc_menu_live_v2", "gibran_menu_live_v1"].forEach((k) => {
+      try {
+        localStorage.removeItem(k);
+      } catch { }
+    });
+
     const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && Array.isArray(parsed.groups) && Array.isArray(parsed.subgroups)) {
-        return normalizeFirestoreData(parsed);
+        const normalized = normalizeFirestoreData(parsed);
+        const hasLegacy = normalized.items.some((it) =>
+          LEGACY_DUMMY_NAMES.has((it.name || "").trim().toLowerCase())
+        );
+        if (hasLegacy) {
+          localStorage.removeItem(LOCAL_STORAGE_KEY);
+          return null;
+        }
+        return normalized;
       }
     }
   } catch {
@@ -99,45 +165,90 @@ function normalizeFirestoreData(data: Record<string, unknown> | undefined): Menu
     let validImage = it.image;
     if (!validImage || validImage.startsWith("/uploads/")) {
       const lowerName = (it.name || "").toLowerCase();
-      if (lowerName.includes("chocolate") || lowerName.includes("fondant") || lowerName.includes("cake")) {
+      if (lowerName.includes("chocolate") || lowerName.includes("brownie") || lowerName.includes("cake")) {
         validImage = "/images/dish-lava-cake.jpg";
-      } else if (lowerName.includes("hummus")) {
-        validImage = "/assets/gallery/hummus-tahini-mezza.jpg";
+      } else if (lowerName.includes("coffee") || lowerName.includes("drink")) {
+        validImage = "/assets/gallery/roastery-cezve.jpg";
+      } else if (lowerName.includes("fries")) {
+        validImage = "/images/crispy-calamari.jpg";
       } else {
-        validImage = "/images/dish-risotto.jpg";
+        validImage = "/images/dish-chicken.jpg";
       }
     }
 
     return {
       ...it,
       image: validImage,
-      groupId: it.groupId || grp?.id || "food",
-      groupName: it.groupName || grp?.name || "Food Menu",
-      subgroupId: it.subgroupId || sub?.id || "starters",
-      subgroupName: it.subgroupName || sub?.name || "Starters & Mezze",
+      groupId: it.groupId || grp?.id || "86",
+      groupName: it.groupName || grp?.name || "Food",
+      subgroupId: it.subgroupId || sub?.id || "93",
+      subgroupName: it.subgroupName || sub?.name || "Burgers",
     };
   });
 
-  // Deduplicate items so duplicate entries never appear
+  // Deduplicate items so duplicate entries never appear and filter out legacy dummy items
   const seenDishNames = new Set<string>();
   items = items.filter((it) => {
     const key = (it.name || "").trim().toLowerCase();
-    if (!key || seenDishNames.has(key)) return false;
+    if (!key || seenDishNames.has(key) || LEGACY_DUMMY_NAMES.has(key)) return false;
     seenDishNames.add(key);
     return true;
   });
 
+  // If no dishes remain, fallback to default RMS dishes so old dummy data never empties the menu
+  if (items.length === 0) {
+    items = DEFAULT_MENU_ITEMS;
+  }
+
   const categories = buildCategoriesFromGroups(groups, subgroups, items);
 
-  return { groups, subgroups, items, categories };
+  const brand = (data?.brand as MenuDataState["brand"]) || {
+    id: 1,
+    code: "TFC001",
+    name: "Taste Fried Chicken",
+    currency: "AED",
+    logo: null,
+  };
+
+  const outlet = (data?.outlet as MenuDataState["outlet"]) || {
+    id: 1,
+    code: "LULU",
+    name: "All Branches / Brand Default",
+    address: null,
+    phone: null,
+  };
+
+  return { groups, subgroups, items, categories, brand, outlet };
 }
 
 /**
- * Loads menu data directly from Firebase Firestore, falling back to local cache or defaults.
+ * Loads menu data directly from RMS or Firebase Firestore, falling back to local cache or defaults.
  */
 export async function getMenuFromFirebase(): Promise<MenuDataState> {
   const local = getLocalStoredState();
 
+  // 1. Try RMS catalog
+  try {
+    if (typeof window !== "undefined") {
+      const res = await fetch("/api/menu");
+      const json = await res.json();
+      if (json.success && json.data && Array.isArray(json.data.items) && json.data.items.length > 0) {
+        saveLocalStoredState(json.data);
+        return json.data;
+      }
+    } else {
+      const { getRestaurantMenuState } = await import("@/lib/rms-menu");
+      const rmsState = await getRestaurantMenuState();
+      if (rmsState && rmsState.items && rmsState.items.length > 0) {
+        saveLocalStoredState(rmsState);
+        return rmsState;
+      }
+    }
+  } catch (err) {
+    console.warn("RMS menu fetch notice, checking local/Firestore:", err);
+  }
+
+  // 2. Fallback to Firestore
   try {
     const snap = await getDoc(MENU_DOC_REF());
     if (snap.exists()) {
@@ -164,14 +275,85 @@ export async function getMenuFromFirebase(): Promise<MenuDataState> {
 }
 
 /**
- * Real-time listener for menu updates directly from Firebase Firestore.
+ * Explicitly synchronizes the menu state with the external RMS catalog.
+ */
+export async function syncWithRMS(): Promise<MenuDataState> {
+  if (typeof window !== "undefined") {
+    const res = await fetch("/api/menu");
+    const json = await res.json();
+    if (json.success && json.data && Array.isArray(json.data.items) && json.data.items.length > 0) {
+      saveLocalStoredState(json.data);
+      return json.data;
+    }
+  } else {
+    const { getRestaurantMenuState } = await import("@/lib/rms-menu");
+    const rmsState = await getRestaurantMenuState();
+    if (rmsState && rmsState.items && rmsState.items.length > 0) {
+      saveLocalStoredState(rmsState);
+      return rmsState;
+    }
+  }
+  return getLocalStoredState() || INITIAL_DEFAULT_STATE;
+}
+
+/**
+ * Real-time listener for menu updates directly from Firebase Firestore and RMS API.
  */
 export function subscribeToFirebaseMenu(
   onUpdate: (state: MenuDataState) => void
 ): () => void {
-  // First deliver cached data immediately if available
+  // First deliver cached data or INITIAL_DEFAULT_STATE immediately so reloading never shows old items or empty state
   const cached = getLocalStoredState();
-  if (cached) onUpdate(cached);
+  onUpdate(cached || INITIAL_DEFAULT_STATE);
+
+  let isDestroyed = false;
+  let lastItemFingerprint = cached
+    ? cached.items.map((i) => `${i.id}_${i.price}_${i.isAvailable}`).join("|")
+    : "";
+
+  // Core background fetch function: polls RMS live menu via /api/menu
+  const fetchFreshMenu = async () => {
+    if (typeof window === "undefined" || isDestroyed) return;
+    try {
+      const res = await fetch(`/api/menu?_t=${Date.now()}`, { cache: "no-store" });
+      if (!res.ok) return;
+      const json = await res.json();
+      if (json.success && json.data && Array.isArray(json.data.items)) {
+        const fingerprint = json.data.items
+          .map((i: MenuItem) => `${i.id}_${i.price}_${i.isAvailable}`)
+          .join("|");
+
+        if (fingerprint !== lastItemFingerprint) {
+          lastItemFingerprint = fingerprint;
+          saveLocalStoredState(json.data);
+          onUpdate(json.data);
+        }
+      }
+    } catch {
+      // Quiet background check failure
+    }
+  };
+
+  // Immediate fetch on mount
+  fetchFreshMenu();
+
+  // 1. Live background polling every 6 seconds to capture additions from RMS console automatically
+  const pollTimer = setInterval(fetchFreshMenu, 6000);
+
+  // 2. Re-fetch immediately whenever window gains focus (e.g. user added dish in console tab and switched back!)
+  const handleFocus = () => {
+    fetchFreshMenu();
+  };
+  const handleVisibility = () => {
+    if (document.visibilityState === "visible") {
+      fetchFreshMenu();
+    }
+  };
+
+  if (typeof window !== "undefined") {
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibility);
+  }
 
   let unsubscribeFirestore: (() => void) | null = null;
 
@@ -180,9 +362,20 @@ export function subscribeToFirebaseMenu(
       MENU_DOC_REF(),
       (snap) => {
         if (snap.exists()) {
-          const state = normalizeFirestoreData(snap.data());
-          saveLocalStoredState(state);
-          onUpdate(state);
+          const docData = snap.data();
+          if (docData?.syncedFromRMS) {
+            const state = normalizeFirestoreData(docData);
+            if (state.items && state.items.length > 0) {
+              const fingerprint = state.items
+                .map((i) => `${i.id}_${i.price}_${i.isAvailable}`)
+                .join("|");
+              if (fingerprint !== lastItemFingerprint) {
+                lastItemFingerprint = fingerprint;
+                saveLocalStoredState(state);
+                onUpdate(state);
+              }
+            }
+          }
         }
       },
       (err) => {
@@ -205,10 +398,14 @@ export function subscribeToFirebaseMenu(
   }
 
   return () => {
-    if (unsubscribeFirestore) unsubscribeFirestore();
+    isDestroyed = true;
+    clearInterval(pollTimer);
     if (typeof window !== "undefined") {
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("gibran-menu-updated", handleLocalUpdate);
     }
+    if (unsubscribeFirestore) unsubscribeFirestore();
   };
 }
 
@@ -575,200 +772,141 @@ export async function convertImageToBase64(
 export const uploadDishImageToFirebase = convertImageToBase64;
 
 /**
- * Authentic Lebanese & Mediterranean Fine Dining Dishes for quick seeding
+ * Taste Fried Chicken Live Dishes for quick seeding or fallback
  */
-export const AUTHENTIC_LEBANESE_DISHES: Omit<MenuItem, "id">[] = [
-  // 1. Starters & Mezze
+export const SAMPLE_RMS_DISHES: Omit<MenuItem, "id">[] = [
   {
-    name: "Hummus bil Lahme (حمص باللحمة)",
-    description: "Silk-smooth whipped chickpeas with artisanal sesame tahini, topped with warm spiced Australian lamb confit, toasted pine nuts, and cold-pressed extra virgin Lebanese olive oil.",
-    price: 65,
-    groupId: "food",
-    groupName: "Food Menu",
-    subgroupId: "starters",
-    subgroupName: "Starters & Mezze",
+    name: "Zinger Burger",
+    description: "Crispy golden fried chicken fillet with fiery seasoning, layered with chilled iceberg lettuce and house toum mayo on a toasted brioche bun.",
+    price: 15,
+    groupId: "86",
+    groupName: "Food",
+    subgroupId: "93",
+    subgroupName: "Burgers",
     badge: "CHEF'S PICK",
-    image: "/assets/gallery/hummus-tahini-mezza.jpg",
-    dietary: ["Non-Vegetarian", "Chef's Selection"],
-    calories: "480 kcal",
-    prepTime: "12 mins",
-    winePairing: "Château Musar Jeune White or Crisp Arak",
-    ingredients: ["Chickpeas", "Tahini", "Spiced Lamb", "Toasted Pine Nuts", "EVOO", "Paprika"],
-  },
-  {
-    name: "Levantine Heritage Fattoush (فتوش جبلي)",
-    description: "Heirloom baby gem lettuce, garden radishes, Persian cucumber, sumac pomegranate molasses vinaigrette, and golden crispy wood-fired pita crisps.",
-    price: 55,
-    groupId: "food",
-    groupName: "Food Menu",
-    subgroupId: "starters",
-    subgroupName: "Starters & Mezze",
-    badge: "SIGNATURE",
-    image: "/assets/gallery/levantine-fattoush.jpg",
-    dietary: ["Vegetarian"],
-    calories: "280 kcal",
+    image: "https://erp-accurtae.s3.ap-south-1.amazonaws.com/arcanum-rms-media/items/1793964825919-df6b42b41cef-zinger.jpg",
+    dietary: ["Non-Vegetarian", "Chef's Selection", "Halal"],
     prepTime: "10 mins",
-    ingredients: ["Baby Gem Lettuce", "Pomegranate Molasses", "Sumac", "Radish", "Woodfired Pita"],
+    dmOrder: 1,
   },
   {
-    name: "Truffle Manakish Zaatar (مناقيش بالزعتر والكمأة)",
-    description: "Wild thyme from Mount Lebanon, roasted white sesame, fresh buffalo mozzarella, sumac, and shaved black winter truffle baked on stone hearth.",
-    price: 75,
-    groupId: "food",
-    groupName: "Food Menu",
-    subgroupId: "starters",
-    subgroupName: "Starters & Mezze",
-    badge: "POPULAR",
-    image: "/assets/gallery/woodfired-zaatar.jpg",
-    dietary: ["Vegetarian"],
-    calories: "420 kcal",
-    prepTime: "15 mins",
-    ingredients: ["Wild Lebanese Zaatar", "Black Truffle", "Buffalo Mozzarella", "Stoneground Flour", "Sesame"],
+    name: "Spicy Chicken Burger",
+    description: "Spicy hand-breaded chicken breast tossed in Aleppo chili rub, smoked paprika aioli, and pickled peppers on artisan bun.",
+    price: 20,
+    groupId: "86",
+    groupName: "Food",
+    subgroupId: "93",
+    subgroupName: "Burgers",
+    badge: "SPICY",
+    image: "/images/dish-chicken.jpg",
+    dietary: ["Non-Vegetarian", "Spicy", "Halal"],
+    prepTime: "10 mins",
+    dmOrder: 2,
   },
   {
-    name: "Spiced Mediterranean Calamari (كلماري مقرمش)",
-    description: "Tender baby squid tossed in crushed Aleppo pepper, wild oregano, roasted garlic, served with sumac-lime toum aioli and charred lemon.",
-    price: 85,
-    groupId: "food",
-    groupName: "Food Menu",
-    subgroupId: "starters",
-    subgroupName: "Starters & Mezze",
-    badge: "HOUSE FAVOURITE",
-    image: "/images/crispy-calamari.jpg",
-    dietary: ["Non-Vegetarian"],
-    calories: "390 kcal",
-    prepTime: "12 mins",
-    ingredients: ["Baby Squid", "Aleppo Chili", "Sumac Lime Aioli", "Garlic", "Sea Salt"],
-  },
-  // 2. Main Courses
-  {
-    name: "Royal Charcoal Lamb Chops (ريش غنم مشوية)",
-    description: "Prime Australian lamb cutlets marinated in 7 Lebanese aromatics and pomegranate glaze, flame-grilled over binchotan charcoal, with smoked garlic toum and batata harra.",
-    price: 195,
-    groupId: "food",
-    groupName: "Food Menu",
-    subgroupId: "mains",
-    subgroupName: "Main Courses",
+    name: "Double Beef Burger",
+    description: "Double prime smashed beef patties with caramelized sweet shallots, melted aged cheddar, and house mustard glaze.",
+    price: 25,
+    groupId: "86",
+    groupName: "Food",
+    subgroupId: "93",
+    subgroupName: "Burgers",
     badge: "SIGNATURE",
     image: "/assets/gallery/charred-lamb-chops.jpg",
-    dietary: ["Non-Vegetarian", "Chef's Selection"],
-    calories: "720 kcal",
-    prepTime: "22 mins",
-    winePairing: "Cabernet Sauvignon / Syrah Blend",
-    ingredients: ["Australian Lamb Rack", "Pomegranate Glaze", "Lebanese 7-Spice", "Garlic Toum", "Rosemary"],
+    dietary: ["Non-Vegetarian", "Halal"],
+    prepTime: "12 mins",
+    dmOrder: 3,
   },
   {
-    name: "Mediterranean Grilled Sea Bass (سيباس مشوي)",
-    description: "Wild-caught Mediterranean sea bass fillet, spiced coriander-walnut harra sauce, glazed baby fennel, and citrus confit.",
-    price: 180,
-    groupId: "food",
-    groupName: "Food Menu",
-    subgroupId: "mains",
-    subgroupName: "Main Courses",
-    badge: "CHEF'S PICK",
-    image: "/assets/gallery/grilled-sea-bass.jpg",
-    dietary: ["Non-Vegetarian", "Gluten-Free"],
-    calories: "510 kcal",
-    prepTime: "20 mins",
-    winePairing: "Sauvignon Blanc or Chablis",
-    ingredients: ["Sea Bass Fillet", "Coriander Harra", "Walnuts", "Charred Lemon", "EVOO"],
-  },
-  {
-    name: "Saffron & Wild Mushroom Risotto (ريزوتو الزعفران)",
-    description: "Acquerello carnaroli rice slow-cooked with royal Persian saffron, sautéed morel mushrooms, 24-month Parmigiano Reggiano, and herb oil.",
-    price: 135,
-    groupId: "food",
-    groupName: "Food Menu",
-    subgroupId: "mains",
-    subgroupName: "Main Courses",
+    name: "Classic Chicken Burger",
+    description: "Tender seasoned chicken fillet flame-seared, topped with crisp garden greens, sweet pickles, and signature house deli dressing.",
+    price: 18,
+    groupId: "86",
+    groupName: "Food",
+    subgroupId: "93",
+    subgroupName: "Burgers",
     badge: "POPULAR",
-    image: "/images/dish-risotto.jpg",
-    dietary: ["Vegetarian", "Gluten-Free"],
-    calories: "590 kcal",
-    prepTime: "25 mins",
-    ingredients: ["Carnaroli Rice", "Persian Saffron", "Morel Mushrooms", "Parmigiano Reggiano"],
-  },
-  {
-    name: "Zaatar Herb Roasted Baby Chicken (فروج مشوي)",
-    description: "Spatchcock organic poussin roasted with mountain zaatar, confit garlic cloves, caramelized shallots, and golden sumac potatoes.",
-    price: 140,
-    groupId: "food",
-    groupName: "Food Menu",
-    subgroupId: "mains",
-    subgroupName: "Main Courses",
-    badge: "HOUSE FAVOURITE",
     image: "/images/dish-chicken.jpg",
-    dietary: ["Non-Vegetarian"],
-    calories: "650 kcal",
-    prepTime: "24 mins",
-    ingredients: ["Free-Range Baby Chicken", "Zaatar Marinade", "Confit Garlic", "Sumac Potatoes"],
-  },
-  // 3. Desserts & Sweets
-  {
-    name: "Artisanal Baklava with Fresh Ashta (بقلاوة بالقشطة)",
-    description: "Hand-rolled crisp filo pastry layered with organic orange blossom Ashta cream, roasted Aleppo pistachios, and warm blossom syrup.",
-    price: 65,
-    groupId: "food",
-    groupName: "Food Menu",
-    subgroupId: "desserts",
-    subgroupName: "Desserts & Sweets",
-    badge: "SIGNATURE",
-    image: "/assets/gallery/baklava-ashta.jpg",
-    dietary: ["Vegetarian"],
-    calories: "450 kcal",
+    dietary: ["Non-Vegetarian", "Halal"],
     prepTime: "10 mins",
-    ingredients: ["Filo Pastry", "Ashta Clotted Cream", "Pistachios", "Orange Blossom Water", "Honey"],
+    dmOrder: 4,
   },
   {
-    name: "Valrhona Molten Chocolate Fondant (كعكة الشوكولاتة)",
-    description: "Warm 70% dark Valrhona chocolate cake with molten heart, served alongside Madagascar bourbon vanilla bean gelato and edible 24k gold leaf.",
-    price: 70,
-    groupId: "food",
-    groupName: "Food Menu",
-    subgroupId: "desserts",
-    subgroupName: "Desserts & Sweets",
+    name: "Fried Chicken 2 PCS",
+    description: "Two pieces of crunchy heritage spiced fried chicken, ultra crisp on the outside, juicy within, served with house dip.",
+    price: 15,
+    groupId: "86",
+    groupName: "Food",
+    subgroupId: "94",
+    subgroupName: "Fried Chicken",
     badge: "POPULAR",
+    image: "/images/dish-chicken.jpg",
+    dietary: ["Non-Vegetarian", "Halal"],
+    prepTime: "10 mins",
+    dmOrder: 1,
+  },
+  {
+    name: "Chicken Tikka",
+    description: "Boneless chicken morsels steeped in aromatic yogurt, coriander, and crushed spices, char-grilled to tender perfection.",
+    price: 15,
+    groupId: "86",
+    groupName: "Food",
+    subgroupId: "94",
+    subgroupName: "Fried Chicken",
+    badge: "CHEF'S PICK",
+    image: "https://erp-accurtae.s3.ap-south-1.amazonaws.com/arcanum-rms-media/items/1793962747483-c60c3404ac23-gobi.jpg",
+    dietary: ["Non-Vegetarian", "Halal"],
+    prepTime: "10 mins",
+    dmOrder: 2,
+  },
+  {
+    name: "French Fries",
+    description: "Triple-cooked golden potato batons lightly dusted with sea salt, served with garlic dip.",
+    price: 15,
+    groupId: "86",
+    groupName: "Food",
+    subgroupId: "99",
+    subgroupName: "Fries",
+    badge: "POPULAR",
+    image: "/images/crispy-calamari.jpg",
+    dietary: ["Vegetarian", "Halal"],
+    prepTime: "8 mins",
+    dmOrder: 1,
+  },
+  {
+    name: "Iced Coffee",
+    description: "Slow-extracted cold brew poured over artisan ice cubes with condensed cardamom cream and freshly frothed milk.",
+    price: 15,
+    groupId: "87",
+    groupName: "Beverages",
+    subgroupId: "97",
+    subgroupName: "Cold Drinks",
+    badge: "POPULAR",
+    image: "/assets/gallery/roastery-cezve.jpg",
+    dietary: ["Vegetarian"],
+    prepTime: "5 mins",
+    dmOrder: 1,
+  },
+  {
+    name: "Chocolate Brownie",
+    description: "Warm Belgian dark chocolate fudge brownie with molten center, topped with roasted Aleppo pistachios and vanilla cream.",
+    price: 15,
+    groupId: "88",
+    groupName: "Desserts",
+    subgroupId: "102",
+    subgroupName: "Chocolate",
+    badge: "SIGNATURE",
     image: "/images/dish-lava-cake.jpg",
     dietary: ["Vegetarian"],
-    calories: "560 kcal",
-    prepTime: "14 mins",
-    ingredients: ["Valrhona 70% Dark Chocolate", "Butter", "Madagascar Vanilla Gelato", "Gold Leaf"],
-  },
-  // 4. Beverages
-  {
-    name: "Beirut Sunset Botanical Spritz",
-    description: "Freshly pressed ruby pomegranate, pink grapefruit, organic rosewater elixir, sparkling soda, and fragrant bruised rosemary.",
-    price: 48,
-    groupId: "beverages",
-    groupName: "Beverages",
-    subgroupId: "mocktails",
-    subgroupName: "Signature Mocktails",
-    badge: "SIGNATURE",
-    image: "/assets/gallery/principal-dining-hall.jpg",
-    dietary: ["Vegetarian", "Gluten-Free"],
-    calories: "120 kcal",
-    prepTime: "5 mins",
-    ingredients: ["Fresh Pomegranate", "Pink Grapefruit", "Rosewater", "Sparkling Soda", "Fresh Rosemary"],
-  },
-  {
-    name: "Traditional Cezve Cardamom Coffee (قهوة عربية)",
-    description: "Dark-roasted heirloom Arabica beans slow-steeped in an authentic hand-hammered copper cezve with crushed green cardamom pods.",
-    price: 35,
-    groupId: "beverages",
-    groupName: "Beverages",
-    subgroupId: "hot-drinks",
-    subgroupName: "Coffee & Infusions",
-    badge: "HOUSE FAVOURITE",
-    image: "/assets/gallery/roastery-cezve.jpg",
-    dietary: ["Vegetarian", "Gluten-Free"],
-    calories: "15 kcal",
-    prepTime: "7 mins",
-    ingredients: ["Heirloom Arabica Coffee", "Green Cardamom", "Spring Water"],
+    prepTime: "8 mins",
+    dmOrder: 1,
   },
 ];
 
+export const AUTHENTIC_LEBANESE_DISHES = SAMPLE_RMS_DISHES;
+
 /**
- * Seeds the menu with the authentic Lebanese tasting menu collection.
+ * Seeds the menu with the live Taste Fried Chicken dishes.
  */
 export async function seedSampleLebaneseDishes(
   currentState: MenuDataState
@@ -776,7 +914,7 @@ export async function seedSampleLebaneseDishes(
   const existingNames = new Set(
     currentState.items.map((it) => it.name.trim().toLowerCase())
   );
-  const dishesToAdd = AUTHENTIC_LEBANESE_DISHES.filter(
+  const dishesToAdd = SAMPLE_RMS_DISHES.filter(
     (d) => !existingNames.has(d.name.trim().toLowerCase())
   );
 
@@ -786,7 +924,7 @@ export async function seedSampleLebaneseDishes(
 
   const newDishes: MenuItem[] = dishesToAdd.map((d, index) => ({
     ...d,
-    id: `lebanese_dish_${Date.now()}_${index}`,
+    id: `dish_${Date.now()}_${index}`,
     createdAt: Date.now() + index,
   }));
 

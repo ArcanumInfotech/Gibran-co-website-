@@ -69,11 +69,13 @@ export function SearchModal({
     ? uniqueItems.filter(
         (dish) =>
           dish.name.toLowerCase().includes(query.toLowerCase()) ||
+          (dish.nameLocal && dish.nameLocal.toLowerCase().includes(query.toLowerCase())) ||
+          (dish.code && dish.code.toLowerCase().includes(query.toLowerCase())) ||
           dish.description.toLowerCase().includes(query.toLowerCase()) ||
-          dish.ingredients?.some((ing) => ing.toLowerCase().includes(query.toLowerCase())) ||
+          dish.subgroupName?.toLowerCase().includes(query.toLowerCase()) ||
           dish.dietary.some((tag) => tag.toLowerCase().includes(query.toLowerCase()))
       )
-    : uniqueItems.slice(0, 6);
+    : uniqueItems.slice(0, 8);
 
   return (
     <AnimatePresence>
@@ -117,7 +119,7 @@ export function SearchModal({
             <input
               type="text"
               autoFocus
-              placeholder="Search dishes, ingredients (truffle, za'atar, lamb)..."
+              placeholder="Search dishes (zinger, burger, tikka, spicy, fries)..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="ml-3 flex-1 border-none bg-transparent p-0 text-base font-normal text-[#1C241B] placeholder-[#8C9387] focus:ring-0"
@@ -138,7 +140,7 @@ export function SearchModal({
             <span className="text-[10px] font-bold uppercase tracking-wider text-[#9FA69B]">
               Suggestions:
             </span>
-            {["Truffle", "Bruschetta", "Calamari", "Wings", "Lamb", "Vegetarian"].map((tag) => (
+            {["Zinger", "Burger", "Chicken", "Tikka", "Spicy", "Fries", "Coffee"].map((tag) => (
               <button
                 key={tag}
                 type="button"
@@ -172,9 +174,16 @@ export function SearchModal({
                       />
                     </div>
                     <div>
-                      <h4 className="font-serif text-sm font-semibold text-[#1C241B] group-hover:text-[#C5A880] transition-colors">
-                        {item.name}
-                      </h4>
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-serif text-sm font-semibold text-[#1C241B] group-hover:text-[#C5A880] transition-colors">
+                          {item.name}
+                        </h4>
+                        {item.nameLocal && (
+                          <span className="text-xs text-[#7A8374] font-medium" dir="rtl">
+                            {item.nameLocal}
+                          </span>
+                        )}
+                      </div>
                       <p className="line-clamp-1 text-[11px] text-[#767E71]">
                         {item.description}
                       </p>
@@ -182,7 +191,7 @@ export function SearchModal({
                   </div>
                   <div className="text-right">
                     <span className="font-sans text-xs sm:text-sm font-bold tabular-nums tracking-normal text-[#1C241B]">
-                      AED {item.price}
+                      {item.currency || "AED"} {Number(item.price).toFixed(2)}
                     </span>
                     {item.badge && (
                       <span className="block text-[8.5px] font-bold uppercase tracking-wider text-[#C5A880]">

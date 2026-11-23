@@ -127,7 +127,7 @@ export function MoodSection() {
                 >
                   <dt className="sr-only">{stat.label}</dt>
                   <dd>
-                    <span className="block font-sans text-2xl sm:text-4xl font-normal text-warmGold tabular-nums">
+                    <span className="block font-sans text-2xl sm:text-4xl font-medium text-warmGold tabular-nums [font-variant-numeric:lining-nums]">
                       <Counter to={stat.value} reduced={reduced} />
                       {stat.suffix}
                     </span>

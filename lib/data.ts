@@ -84,48 +84,74 @@ export const restaurantLocations: RestaurantLocation[] = [
 export type Dish = {
   id: string;
   name: string;
+  nameLocal?: string;
   description: string;
   price: string;
   image: string;
   tag?: string;
+  dmOrder?: number;
 };
 
 export const signatureDishes: Dish[] = [
   {
-    id: "risotto",
-    name: "Truffle Mushroom Risotto",
+    id: "119",
+    name: "Zinger Burger",
     description:
-      "Arborio rice, wild forest porcini, aged parmesan & shaved black truffle.",
-    price: "AED 18",
-    image: "/images/dish-risotto.jpg",
-    tag: "Vegetarian",
+      "Crispy golden fried chicken fillet with fiery seasoning, layered with chilled iceberg lettuce and house toum mayo on a toasted brioche bun.",
+    price: "AED 15.00",
+    image: "https://erp-accurtae.s3.ap-south-1.amazonaws.com/arcanum-rms-media/items/1793964825919-df6b42b41cef-zinger.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIATIQGTY745M4RS4FP%2F20261123%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20261123T100255Z&X-Amz-Expires=3600&X-Amz-Signature=e0a023aae9832b9b97b5649c005c939aef0cd27c7236169c7fc81cc3eb83ec24&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject",
+    tag: "Chef's Pick",
+    dmOrder: 1,
   },
   {
-    id: "chicken",
-    name: "Grilled Lavender Chicken",
+    id: "107",
+    name: "Spicy Chicken Burger",
     description:
-      "Free-range chicken breast infused with Provence lavender, baby carrots & jus.",
-    price: "AED 22",
+      "Spicy hand-breaded chicken breast tossed in Aleppo chili rub, smoked paprika aioli, and pickled peppers on artisan bun.",
+    price: "AED 20.00",
     image: "/images/dish-chicken.jpg",
-    tag: "House Favourite",
+    tag: "Spicy",
+    dmOrder: 2,
   },
   {
-    id: "lava-cake",
-    name: "Chocolate Lava Cake",
+    id: "109",
+    name: "Double Beef Burger",
     description:
-      "Valrhona dark chocolate molten centre served with Tahitian vanilla bean gelato.",
-    price: "AED 12",
-    image: "/images/dish-lava-cake.jpg",
+      "Double prime smashed beef patties with caramelized sweet shallots, melted aged cheddar, and house mustard glaze.",
+    price: "AED 25.00",
+    image: "/assets/gallery/charred-lamb-chops.jpg",
     tag: "Signature",
+    dmOrder: 3,
   },
   {
-    id: "fruit-tart",
-    name: "Seasonal Fruit Tart",
+    id: "111",
+    name: "Fried Chicken 2 PCS",
     description:
-      "Crisp shortbread crust, Madagascar pastry cream, glazed summer berries & mint.",
-    price: "AED 10",
-    image: "/images/dish-fruit-tart.jpg",
-    tag: "Seasonal",
+      "Two pieces of crunchy heritage spiced fried chicken, ultra crisp on the outside, juicy within, served with house dip.",
+    price: "AED 15.00",
+    image: "/images/dish-chicken.jpg",
+    tag: "Popular",
+    dmOrder: 4,
+  },
+  {
+    id: "112",
+    name: "Chicken Tikka",
+    description:
+      "Boneless chicken morsels steeped in aromatic yogurt, coriander, and crushed spices, char-grilled to tender perfection.",
+    price: "AED 15.00",
+    image: "https://erp-accurtae.s3.ap-south-1.amazonaws.com/arcanum-rms-media/items/1793962747483-c60c3404ac23-gobi.jpg",
+    tag: "House Favourite",
+    dmOrder: 5,
+  },
+  {
+    id: "117",
+    name: "Chocolate Brownie",
+    description:
+      "Warm Belgian dark chocolate fudge brownie with molten center, topped with roasted Aleppo pistachios and vanilla cream.",
+    price: "AED 15.00",
+    image: "/images/dish-lava-cake.jpg",
+    tag: "Dessert",
+    dmOrder: 6,
   },
 ];
 
@@ -133,74 +159,58 @@ export type MenuCategory = {
   id: string;
   label: string;
   intro: string;
-  items: { name: string; note: string; price: string }[];
+  order?: number;
+  items: { name: string; note: string; price: string; id?: string; dmOrder?: number }[];
 };
 
 export const menuCategories: MenuCategory[] = [
   {
-    id: "signatures",
-    label: "Signature Dishes",
-    intro: "Our celebrated master creations — porcini risottos, lavender chicken, and molten cacao.",
+    id: "burgers",
+    label: "Burgers",
+    order: 1,
+    intro: "Zinger, classic, double beef, and specialty chicken burgers crafted fresh to order.",
     items: [
-      { name: "Truffle Mushroom Risotto", note: "Porcini, aged parmesan, black truffle", price: "AED 18" },
-      { name: "Grilled Lavender Chicken", note: "Provence lavender, baby carrots, jus", price: "AED 22" },
-      { name: "Chocolate Lava Cake", note: "Valrhona molten centre, Tahitian vanilla", price: "AED 12" },
-      { name: "Seasonal Fruit Tart", note: "Shortbread crust, Madagascar pastry cream", price: "AED 10" },
+      { id: "119", name: "Zinger Burger", note: "Crispy chicken fillet, iceberg lettuce, signature mayo", price: "AED 15.00", dmOrder: 1 },
+      { id: "107", name: "Spicy Chicken Burger", note: "Hand-breaded spicy chicken, smoked paprika aioli", price: "AED 20.00", dmOrder: 2 },
+      { id: "109", name: "Double Beef Burger", note: "Double smashed beef patties, cheddar, shallots", price: "AED 25.00", dmOrder: 3 },
+      { id: "106", name: "Classic Chicken Burger", note: "Tender seasoned chicken fillet, garden greens", price: "AED 18.00", dmOrder: 4 },
     ],
   },
   {
-    id: "starters",
-    label: "Starters",
-    intro: "Small plates to open the palate — bright, herbaceous, unhurried.",
+    id: "fried-chicken",
+    label: "Fried Chicken & Grills",
+    order: 2,
+    intro: "Heritage recipe crispy fried chicken and skewered chicken tikka.",
     items: [
-      { name: "Hummus & Tahini", note: "Warm chickpeas, olive oil, za’atar", price: "AED 9" },
-      { name: "Baba Ganoush", note: "Smoked aubergine, pomegranate molasses", price: "AED 11" },
-      { name: "Levantine Fattoush", note: "Garden leaves, sumac, crisp pita", price: "AED 12" },
-      { name: "Lamb Arayes", note: "Spiced lamb, garlic toum, griddle bread", price: "AED 16" },
+      { id: "111", name: "Fried Chicken 2 PCS", note: "Two pieces crunchy spiced fried chicken with dip", price: "AED 15.00", dmOrder: 1 },
+      { id: "112", name: "Chicken Tikka", note: "Boneless chicken steeped in spiced yogurt, char-grilled", price: "AED 15.00", dmOrder: 2 },
     ],
   },
   {
-    id: "mains",
-    label: "Main Course",
-    intro: "The centre of the table — slow-cooked, flame-finished, generous.",
+    id: "sides",
+    label: "Sides & Fries",
+    order: 3,
+    intro: "Golden seasoned potato fries and savory sides to accompany your feast.",
     items: [
-      { name: "Charred Lamb Chops", note: "Rosemary jus, grilled lemon", price: "AED 34" },
-      { name: "Braised Short Rib", note: "Baharat spice, root vegetables", price: "AED 32" },
-      { name: "Grilled Sea Bass", note: "Levantine herb crust, fennel", price: "AED 31" },
-      { name: "Wild Mushroom Risotto", note: "Porcini, truffle, aged parmesan", price: "AED 18" },
-    ],
-  },
-  {
-    id: "pasta",
-    label: "Pasta & Risotto",
-    intro: "Silk-thin hand-rolled pasta and all’onda rice, finished to order.",
-    items: [
-      { name: "Lobster Linguine", note: "Brown butter, n’duja, citrus", price: "AED 29" },
-      { name: "Truffle Risotto", note: "Wild porcini, black truffle", price: "AED 18" },
-      { name: "Saffron Orzo", note: "Lamb stock, toasted almond", price: "AED 17" },
-      { name: "Aubergine Maklouba", note: "Fried aubergine, tomato, pine nut", price: "AED 15" },
-    ],
-  },
-  {
-    id: "desserts",
-    label: "Desserts",
-    intro: "A quiet, sweet finale — restrained and beautifully made.",
-    items: [
-      { name: "Chocolate Lava Cake", note: "Valrhona, vanilla bean gelato", price: "AED 12" },
-      { name: "Seasonal Fruit Tart", note: "Pastry cream, glazed berries", price: "AED 10" },
-      { name: "Baklava & Ashta", note: "Pistachio, filo, clotted cream", price: "AED 11" },
-      { name: "Mouhalabia", note: "Orange blossom, almond, rose water", price: "AED 9" },
+      { id: "113", name: "French Fries", note: "Triple-cooked golden potato batons with sea salt & dip", price: "AED 15.00", dmOrder: 1 },
     ],
   },
   {
     id: "beverages",
     label: "Beverages",
-    intro: "Lebanese coffee, mountain herbs and a cellar chosen for the table.",
+    order: 4,
+    intro: "Cold drinks, refreshments, and artisan slow-extracted iced coffees.",
     items: [
-      { name: "Lebanese Coffee", note: "Cardamom, orange blossom", price: "AED 6" },
-      { name: "Sage & Lemon", note: "Mountain za’atar infusion", price: "AED 7" },
-      { name: "Cellar Red — Lebanese", note: "Béthanie, glass", price: "AED 14" },
-      { name: "Arak & Ice", note: "Aniseed, traditional", price: "AED 11" },
+      { id: "118", name: "Iced Coffee", note: "Slow-extracted cold brew with condensed cardamom cream", price: "AED 15.00", dmOrder: 1 },
+    ],
+  },
+  {
+    id: "desserts",
+    label: "Desserts",
+    order: 5,
+    intro: "Decadent dark chocolate brownies and indulgent sweet finishes.",
+    items: [
+      { id: "117", name: "Chocolate Brownie", note: "Warm Belgian dark chocolate fudge brownie with molten center", price: "AED 15.00", dmOrder: 1 },
     ],
   },
 ];
