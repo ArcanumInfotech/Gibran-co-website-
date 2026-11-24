@@ -391,13 +391,31 @@ export async function getRestaurantMenu(): Promise<RMSMenuData> {
     console.warn("RMS fetch timeout or error, falling back to cached catalog:", err);
   }
 
-  // Fallback to disk cache
+  // Fallback to disk cache if available
   const cached = readDiskCache();
   if (cached) {
     return cached;
   }
 
-  throw new Error("Failed to load restaurant menu from RMS and no cached menu available");
+  // If RMS is unreachable and no cache exists, return an empty menu safely without crashing
+  return {
+    brand: {
+      id: 64,
+      code: "TFC001",
+      name: "Taste Fried Chicken",
+      currency: "AED",
+      logo: null,
+    },
+    outlet: {
+      id: null,
+      code: null,
+      name: null,
+      address: null,
+      phone: null,
+    },
+    categories: [],
+    groups: [],
+  };
 }
 
 /**
