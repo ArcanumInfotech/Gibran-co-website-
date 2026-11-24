@@ -277,7 +277,7 @@ export const infoStrip: {
     },
     {
       label: "Call Us",
-      value: "0000000000",
+      value: "+971 56 505 3149",
       icon: "phone",
       id: "contact",
     },

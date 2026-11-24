@@ -109,7 +109,7 @@ export function ReservationSection() {
             </Magnetic>
 
             <a
-              href="tel:0000000000"
+              href="tel:+971565053149"
               className="group inline-flex w-full sm:w-auto items-center justify-center gap-2.5 rounded-full border border-white/20 bg-white/5 px-5 sm:px-6 py-3.5 text-[11px] sm:text-xs font-medium uppercase tracking-[0.16em] sm:tracking-[0.18em] text-[#FAF8F5] backdrop-blur-md transition-all duration-300 hover:border-warmGold hover:bg-white/10 hover:text-warmGold"
             >
               <PhoneIcon className="h-4 w-4 text-warmGold transition-transform duration-300 group-hover:scale-110" />

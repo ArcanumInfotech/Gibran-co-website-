@@ -269,11 +269,10 @@ export function ReservationModal({
                       key={seat}
                       type="button"
                       onClick={() => setSeating(seat)}
-                      className={`rounded-xl px-2 py-2 text-center text-[10px] sm:text-[11px] font-medium transition-all ${
-                        seating === seat
+                      className={`rounded-xl px-2 py-2 text-center text-[10px] sm:text-[11px] font-medium transition-all ${seating === seat
                           ? "bg-[#1C241B] text-white shadow-sm"
                           : "border border-[#DCD5C6] bg-white text-[#4A5346] hover:bg-[#F2ECE0]"
-                      }`}
+                        }`}
                     >
                       {seat}
                     </button>
@@ -304,7 +303,7 @@ export function ReservationModal({
                     <input
                       type="tel"
                       required
-                      placeholder="0000000000"
+                      placeholder="+971 56 505 3149"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       className="mt-1 w-full rounded-xl border border-[#DCD5C6] bg-white px-3.5 py-2.5 text-xs text-[#1C241B] focus:border-[#1C241B] focus:ring-0"

@@ -266,16 +266,16 @@ export function Header() {
                 </Link>
                 <div className="flex flex-col gap-1.5 pt-1">
                   <a
-                    href="https://wa.me/0000000000"
+                    href="https://wa.me/971565053149"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-xs font-semibold text-[#25D366] hover:underline"
                   >
                     <WhatsAppIcon className="h-4 w-4 fill-[#25D366]" />
-                    <span>WhatsApp: 0000000000</span>
+                    <span>WhatsApp: +971 56 505 3149</span>
                   </a>
                   <p className="text-[11px] uppercase tracking-[0.2em] text-oliveMuted">
-                    Tel: 0000000000
+                    Tel: +971 56 505 3149
                   </p>
                 </div>
               </motion.div>

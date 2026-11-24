@@ -102,13 +102,13 @@ export function Footer() {
           className="mt-8 flex items-center justify-center"
         >
           <a
-            href="https://wa.me/0000000000"
+            href="https://wa.me/971565053149"
             target="_blank"
             rel="noopener noreferrer"
             className="group inline-flex items-center gap-2.5 rounded-full border border-[#25D366]/30 bg-[#25D366]/10 px-5 py-2.5 text-xs font-medium text-[#FAF8F5] transition-all duration-300 hover:border-[#25D366] hover:bg-[#25D366]/20 hover:text-white"
           >
             <WhatsAppIcon className="h-4 w-4 fill-[#25D366] transition-transform duration-300 group-hover:scale-110" />
-            <span>Chat on WhatsApp: <span className="text-[#25D366] font-semibold">0000000000</span></span>
+            <span>Chat on WhatsApp: <span className="text-[#25D366] font-semibold">+971 56 505 3149</span></span>
           </a>
         </motion.div>
 
