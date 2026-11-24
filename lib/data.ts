@@ -277,7 +277,7 @@ export const infoStrip: {
     },
     {
       label: "Call Us",
-      value: "+973 123 4567",
+      value: "0000000000",
       icon: "phone",
       id: "contact",
     },

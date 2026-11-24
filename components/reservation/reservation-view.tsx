@@ -545,7 +545,7 @@ export function ReservationView() {
                       </Magnetic>
 
                       <a
-                        href="https://wa.me/97339001234?text=Hello%20Gibran%20%26%20Co.%20Concierge%2C%20I%20would%20like%20to%20reserve%20a%20table."
+                        href="https://wa.me/0000000000?text=Hello%20Gibran%20%26%20Co.%20Concierge%2C%20I%20would%20like%20to%20reserve%20a%20table."
                         className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-black/25 px-5 py-3.5 text-xs font-semibold text-[#A6B8A2] hover:text-white hover:border-[#C5A880] transition-colors"
                       >
                         <WhatsAppIcon className="h-3.5 w-3.5 fill-[#25D366]" />
@@ -802,10 +802,10 @@ export function ReservationView() {
                   Call Us
                 </span>
                 <a
-                  href="tel:+9731234567"
+                  href="tel:0000000000"
                   className="font-sans text-sm font-medium text-white hover:text-[#C5A880] transition-colors sm:text-base tracking-normal"
                 >
-                  +973 123 4567
+                  0000000000
                 </a>
               </div>
             </div>

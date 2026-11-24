@@ -78,9 +78,9 @@ export function Header() {
   const headerMotion = reduced
     ? {}
     : {
-        y: hidden ? "-110%" : "0%",
-        transition: { duration: 0.5, ease: EASE_EDITORIAL },
-      };
+      y: hidden ? "-110%" : "0%",
+      transition: { duration: 0.5, ease: EASE_EDITORIAL },
+    };
 
   return (
     <>
@@ -136,9 +136,8 @@ export function Header() {
                       window.scrollTo({ top: 0, behavior: "smooth" });
                     }
                   }}
-                  className={`group relative transition-colors duration-300 hover:text-oliveDark ${
-                    isActive ? "font-semibold text-oliveDark" : ""
-                  }`}
+                  className={`group relative transition-colors duration-300 hover:text-oliveDark ${isActive ? "font-semibold text-oliveDark" : ""
+                    }`}
                 >
                   {link.label}
                   {isActive ? (
@@ -227,29 +226,29 @@ export function Header() {
                 </div>
 
                 <ul className="flex flex-col gap-1">
-                {navLinks.map((link, index) => (
-                  <motion.li
-                    key={link.href}
-                    initial={{ opacity: 0, x: 32 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{
-                      delay: 0.12 + index * 0.06,
-                      duration: 0.5,
-                      ease: EASE_EDITORIAL,
-                    }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => go(link.href)}
-                      className="group flex w-full items-center border-b border-[#ECE7DC] py-4 text-left"
+                  {navLinks.map((link, index) => (
+                    <motion.li
+                      key={link.href}
+                      initial={{ opacity: 0, x: 32 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{
+                        delay: 0.12 + index * 0.06,
+                        duration: 0.5,
+                        ease: EASE_EDITORIAL,
+                      }}
                     >
-                      <span className="font-serif text-3xl text-oliveDark transition-transform duration-500 ease-editorial group-hover:translate-x-1">
-                        {link.label}
-                      </span>
-                    </button>
-                  </motion.li>
-                ))}
-              </ul>
+                      <button
+                        type="button"
+                        onClick={() => go(link.href)}
+                        className="group flex w-full items-center border-b border-[#ECE7DC] py-4 text-left"
+                      >
+                        <span className="font-serif text-3xl text-oliveDark transition-transform duration-500 ease-editorial group-hover:translate-x-1">
+                          {link.label}
+                        </span>
+                      </button>
+                    </motion.li>
+                  ))}
+                </ul>
               </div>
 
               <motion.div
@@ -267,16 +266,16 @@ export function Header() {
                 </Link>
                 <div className="flex flex-col gap-1.5 pt-1">
                   <a
-                    href="https://wa.me/97339001234"
+                    href="https://wa.me/0000000000"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-xs font-semibold text-[#25D366] hover:underline"
                   >
                     <WhatsAppIcon className="h-4 w-4 fill-[#25D366]" />
-                    <span>WhatsApp: +973 3900 1234</span>
+                    <span>WhatsApp: 0000000000</span>
                   </a>
                   <p className="text-[11px] uppercase tracking-[0.2em] text-oliveMuted">
-                    Tel: +973 123 4567
+                    Tel: 0000000000
                   </p>
                 </div>
               </motion.div>

@@ -52,7 +52,7 @@ export function ContactView() {
       snapshot.message,
     ];
     const encodedText = encodeURIComponent(messageLines.join("\n"));
-    const whatsappUrl = `https://wa.me/97339001234?text=${encodedText}`;
+    const whatsappUrl = `https://wa.me/0000000000?text=${encodedText}`;
 
     setIsSubmitted(true);
     setIsSubmitting(false);
@@ -67,16 +67,16 @@ export function ContactView() {
     {
       title: "WhatsApp Concierge",
       caption: "Instant WhatsApp Chat",
-      value: "+973 3900 1234",
-      href: "https://wa.me/97339001234",
+      value: "0000000000",
+      href: "https://wa.me/0000000000",
       icon: WhatsAppIcon,
       note: "Click to chat directly with guest concierge",
     },
     {
       title: "Direct Reservations",
       caption: "Telephone Hotline",
-      value: "+973 123 4567",
-      href: "tel:+9731234567",
+      value: "0000000000",
+      href: "tel:0000000000",
       icon: PhoneIcon,
       note: "Available daily 11:00 AM – 11:00 PM",
     },
@@ -292,7 +292,7 @@ export function ContactView() {
                   {/* Actions: Open in WhatsApp or Send another */}
                   <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
                     <a
-                      href={`https://wa.me/97339001234?text=${encodeURIComponent(
+                      href={`https://wa.me/0000000000?text=${encodeURIComponent(
                         `*New Concierge Inquiry — Gibran & Co.*\n\n*Name:* ${submittedData.name}\n*Phone:* ${submittedData.phone}\n*Email:* ${submittedData.email}\n*Inquiry Topic:* ${submittedData.inquiryType}\n\n*Message:*\n${submittedData.message}`
                       )}`}
                       target="_blank"
@@ -364,7 +364,7 @@ export function ContactView() {
                         required
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        placeholder="+973 123 4567"
+                        placeholder="0000000000"
                         className="mt-1.5 w-full rounded-xl border border-[#DCD5C6] bg-white px-4 py-3 text-xs text-oliveDark placeholder-oliveMuted/60 transition-colors focus:border-[#6d7835] focus:outline-none focus:ring-1 focus:ring-[#6d7835]"
                       />
                     </div>

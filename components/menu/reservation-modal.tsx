@@ -304,7 +304,7 @@ export function ReservationModal({
                     <input
                       type="tel"
                       required
-                      placeholder="+973 3900 1234"
+                      placeholder="0000000000"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       className="mt-1 w-full rounded-xl border border-[#DCD5C6] bg-white px-3.5 py-2.5 text-xs text-[#1C241B] focus:border-[#1C241B] focus:ring-0"
