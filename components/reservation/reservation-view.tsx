@@ -733,10 +733,11 @@ export function ReservationView() {
                 whileTap={{ scale: 0.95 }}
                 onClick={toggleVideo}
                 aria-label={isPlayingBgVideo ? "Pause background atmosphere motion" : "Play background atmosphere motion"}
-                className={`group relative z-20 flex h-20 w-20 items-center justify-center rounded-full border backdrop-blur-md shadow-2xl transition-all duration-300 ${isPlayingBgVideo
+                className={`group relative z-20 flex h-20 w-20 items-center justify-center rounded-full border backdrop-blur-md shadow-2xl transition-all duration-300 ${
+                  isPlayingBgVideo
                     ? "border-[#6d7835] bg-[#6d7835] ring-4 ring-[#6d7835]/40 text-white"
                     : "border-[#6d7835] bg-[#6d7835] text-white hover:bg-[#5b642c] hover:border-[#5b642c]"
-                  }`}
+                }`}
               >
                 {!isPlayingBgVideo && (
                   <span className="absolute inset-0 rounded-full bg-[#6d7835]/40 animate-ping" />

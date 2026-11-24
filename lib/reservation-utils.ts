@@ -16,16 +16,16 @@ export function formatReservationMessage(details: BookingConfirmationDetails): s
   const dishesBlock =
     details.selectedDishes && details.selectedDishes.length > 0
       ? [
-        ``,
-        `🍽️ *Table Selection / Pre-ordered Dishes:*`,
-        ...details.selectedDishes.map(
-          (d) => `• ${d.quantity}x ${d.name} (AED ${d.price * d.quantity})`
-        ),
-        `💰 *Estimated Dishes Total:* AED ${details.selectedDishes.reduce(
-          (sum, d) => sum + d.price * d.quantity,
-          0
-        )}`,
-      ]
+          ``,
+          `🍽️ *Table Selection / Pre-ordered Dishes:*`,
+          ...details.selectedDishes.map(
+            (d) => `• ${d.quantity}x ${d.name} (AED ${d.price * d.quantity})`
+          ),
+          `💰 *Estimated Dishes Total:* AED ${details.selectedDishes.reduce(
+            (sum, d) => sum + d.price * d.quantity,
+            0
+          )}`,
+        ]
       : [];
 
   const lines = [
